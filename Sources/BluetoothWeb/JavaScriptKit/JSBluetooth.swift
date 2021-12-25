@@ -10,22 +10,24 @@ import JavaScriptKit
 /// JavaScript Bluetooth interface
 /// 
 /// - SeeAlso: [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
-public final class JSBluetooth {
+public final class JSBluetooth: JSBridgedClass {
+    
+    public static let constructor = JSObject.global.Bluetooth.function!
     
     // MARK: - Properties
     
-    internal let jsObject: JSObject
+    public let jsObject: JSObject
     
     // MARK: - Initialization
-
-    internal init?(_ jsObject: JSObject) {
+    
+    public required init(unsafelyWrapping jsObject: JSObject) {
         self.jsObject = jsObject
     }
     
     public static let shared: JSBluetooth? = JSObject.global
         .navigator.object?
         .bluetooth.object
-        .flatMap { JSBluetooth($0) }
+        .flatMap { JSBluetooth(unsafelyWrapping: $0) }
     
     // MARK: - Accessors
     
@@ -98,7 +100,7 @@ public final class JSBluetooth {
         let result = function.callAsFunction(this: jsObject, arguments: [optionsArg])
         guard let promise = result.object.flatMap({ JSPromise($0) })
             else { fatalError("Invalid object \(result)") }
-        return try await promise.get().object.flatMap({ JSBluetoothDevice($0) })!
+        return try await promise.get().object.flatMap({ JSBluetoothDevice(unsafelyWrapping: $0) })!
     }
 }
 
