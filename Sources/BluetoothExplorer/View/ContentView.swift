@@ -34,23 +34,22 @@ struct ContentView: View {
         case .some(true):
             if isScanning {
                 AnyView(Text("Scanning for devices..."))
-            } else {
+            } else if let peripheral = device {
                 AnyView(
                     NavigationView {
-                        AnyView(
-                            VStack(alignment: .center, spacing: nil) {
-                                Button("Scan") {
-                                    Task { await scan() }
-                                }.padding()
-                                if let peripheral = self.device {
-                                    ScrollView {
-                                        PeripheralView(peripheral: peripheral)
-                                    }
-                                }
+                        VStack {
+                            Button("Scan") {
+                                Task { await scan() }
                             }
-                            .padding()
-                        )
+                            PeripheralView(peripheral: peripheral)
+                        }
                     }
+                )
+            } else {
+                AnyView(
+                    Button("Scan") {
+                        Task { await scan() }
+                    }.padding()
                 )
             }
         }

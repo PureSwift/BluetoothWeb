@@ -18,25 +18,23 @@ struct PeripheralView: View {
     let peripheral: Store.Peripheral
     
     var body: some View {
-        ScrollView {
-            VStack {
-                if let name = scanData?.advertisementData.localName {
-                    Text(verbatim: name)
-                }
-                OutlineGroup(groups, children: \.children) { group in
-                    switch group {
-                    case let .service(serviceGroup):
-                        AnyView(
-                            Text(verbatim: serviceGroup.service.uuid.description)
+        VStack {
+            if let name = scanData?.advertisementData.localName {
+                Text(verbatim: name)
+            }
+            OutlineGroup(groups, children: \.children) { group in
+                switch group {
+                case let .service(serviceGroup):
+                    AnyView(
+                        Text(verbatim: serviceGroup.service.uuid.description)
+                    )
+                case let .characteristic(characteristicGroup):
+                    AnyView(
+                        NavigationLink(
+                            characteristicGroup.characteristic.uuid.description,
+                            destination: CharacteristicView(characteristic: characteristicGroup.characteristic)
                         )
-                    case let .characteristic(characteristicGroup):
-                        AnyView(
-                            NavigationLink(
-                                characteristicGroup.characteristic.uuid.description,
-                                destination: CharacteristicView(characteristic: characteristicGroup.characteristic)
-                            )
-                        )
-                    }
+                    )
                 }
             }
         }
