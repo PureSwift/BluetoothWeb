@@ -26,10 +26,13 @@ public protocol CentralManager {
     associatedtype AttributeID: Hashable
     
     #if os(WASI)
-    func scan() async throws -> ScanData<Peripheral, Advertisement>
+    func scan(with services: Set<BluetoothUUID>) async throws -> ScanData<Peripheral, Advertisement>
     #else
     /// Scans for peripherals that are advertising services.
-    func scan(filterDuplicates: Bool) -> AsyncThrowingStream<ScanData<Peripheral, Advertisement>, Error>
+    func scan(
+        with services: Set<BluetoothUUID>,
+        filterDuplicates: Bool
+    ) -> AsyncThrowingStream<ScanData<Peripheral, Advertisement>, Error>
     
     /// Stops scanning for peripherals.
     func stopScan() async
