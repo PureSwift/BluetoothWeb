@@ -32,20 +32,22 @@ struct PeripheralView: View {
             // Detail view
             statusView
             // GATT
-            OutlineGroup(groups, children: \.children) { group in
-                switch group {
-                case let .service(serviceGroup):
-                    AnyView(
-                        Text(verbatim: serviceGroup.service.uuid.description)
-                    )
-                case let .characteristic(characteristicGroup):
-                    AnyView(
-                        Button(action: {
-                            select(characteristicGroup.characteristic)
-                        }, label: {
-                            Text(verbatim: characteristicGroup.characteristic.uuid.description)
-                        })
-                    )
+            VStack(alignment: .leading, spacing: 5) {
+                OutlineGroup(groups, children: \.children) { group in
+                    switch group {
+                    case let .service(serviceGroup):
+                        AnyView(
+                            Text(verbatim: serviceGroup.service.uuid.description)
+                        )
+                    case let .characteristic(characteristicGroup):
+                        AnyView(
+                            Button(action: {
+                                select(characteristicGroup.characteristic)
+                            }, label: {
+                                Text(verbatim: characteristicGroup.characteristic.uuid.description)
+                            })
+                        )
+                    }
                 }
             }
             .buttonStyle(BorderlessButtonStyle())
@@ -73,7 +75,7 @@ extension PeripheralView {
             }
         }
         
-        var uuid: WebCentral.AttributeID {
+        var uuid: BluetoothUUID {
             switch self {
             case let .service(group):
                 return group.service.uuid
