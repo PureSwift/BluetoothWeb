@@ -8,6 +8,7 @@
 import Foundation
 // import Bluetooth
 
+/// [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
 public final class WebCentral { //: CentralManager {
     
     public static let shared: WebCentral? = {
@@ -18,11 +19,19 @@ public final class WebCentral { //: CentralManager {
         return central
     }()
     
+    // MARK: - Properties
+    
     internal let bluetooth: JSBluetooth
+    
+    private var cache = Cache()
+    
+    // MARK: - Initialization
     
     internal init(_ bluetooth: JSBluetooth) {
         self.bluetooth = bluetooth
     }
+    
+    // MARK: - Methods
     
     public var isAvailable: Bool {
         get async {
@@ -32,6 +41,9 @@ public final class WebCentral { //: CentralManager {
     
     public func scan() async throws -> ScanData<Peripheral, Advertisement> {
         let device = try await bluetooth.requestDevice()
+        let peripheral = Peripheral(id: device.id)
+        self.cache = Cache()
+        self.cache.devices[peripheral] = device
         return ScanData(
             peripheral: Peripheral(id: device.id),
             date: Date(),
@@ -40,7 +52,160 @@ public final class WebCentral { //: CentralManager {
             isConnectable: true
         )
     }
+    
+    /// Connect to the specified device
+    public func connect(to peripheral: Peripheral) async throws {
+        guard let device = self.cache.devices[peripheral] else {
+            throw CentralError.unknownPeripheral
+        }
+        try await device.remoteServer.connect()
+    }
+    
+    /// Disconnect the specified device.
+    public func disconnect(_ peripheral: Peripheral) {
+        guard let device = self.cache.devices[peripheral] else {
+            return
+        }
+        device.remoteServer.disconnect()
+    }
+    
+    /// Disconnect all connected devices.
+    public func disconnectAll() {
+        self.cache.devices.values.forEach {
+            $0.remoteServer.disconnect()
+        }
+    }
+    
+    /// Discover Services
+    public func discoverServices(
+        _ serviceUUIDs: Set<BluetoothUUID>,
+        for peripheral: Peripheral
+    ) async throws -> [Service<Peripheral, AttributeID>] {
+        guard serviceUUIDs.isEmpty == false else {
+            print("UUIDs are required for service discovery")
+            return []
+        }
+        guard let device = self.cache.devices[peripheral] else {
+            throw CentralError.unknownPeripheral
+        }
+        // discover
+        var serviceObjects = [JSBluetoothRemoteGATTService]()
+        serviceObjects.reserveCapacity(serviceUUIDs.count)
+        for uuid in serviceUUIDs {
+            let serviceObject = try await device.remoteServer.primaryService(for: uuid.rawValue)
+            serviceObjects.append(serviceObject)
+        }
+        let services = serviceObjects.map { serviceObject in
+            Service(
+                id: BluetoothUUID(rawValue: serviceObject.uuid)!,
+                uuid: BluetoothUUID(rawValue: serviceObject.uuid)!,
+                peripheral: peripheral,
+                isPrimary: serviceObject.isPrimary
+            )
+        }
+        // cache
+        for (index, service) in services.enumerated() {
+            let serviceObject = serviceObjects[index]
+            self.cache.services[service] = serviceObject
+        }
+        return services
+    }
+    
+    /// Discover Characteristics for service
+    public func discoverCharacteristics(
+        _ characteristicUUIDs: Set<BluetoothUUID>,
+        for service: Service<Peripheral, AttributeID>
+    ) async throws -> [Characteristic<Peripheral, AttributeID>] {
+        guard characteristicUUIDs.isEmpty == false else {
+            print("UUIDs are required for characteristic discovery")
+            return []
+        }
+        guard let _ = self.cache.devices[service.peripheral] else {
+            throw CentralError.unknownPeripheral
+        }
+        guard let serviceObject = self.cache.services[service] else {
+            throw CentralError.invalidAttribute(service.uuid)
+        }
+        // discover
+        var characteristicObjects = [JSBluetoothRemoteGATTCharacteristic]()
+        characteristicObjects.reserveCapacity(characteristicUUIDs.count)
+        for uuid in characteristicUUIDs {
+            let characteristicObject = try await serviceObject.characteristic(for: uuid.rawValue)
+            characteristicObjects.append(characteristicObject)
+        }
+        let characteristics = characteristicObjects.map { characteristicObject in
+            Characteristic(
+                id: BluetoothUUID(rawValue: characteristicObject.uuid)!,
+                uuid: BluetoothUUID(rawValue: characteristicObject.uuid)!,
+                peripheral: service.peripheral, // TODO:
+                properties: [] //characteristicObject.properties
+            )
+        }
+        // cache
+        for (index, characteristic) in characteristics.enumerated() {
+            let characteristicObject = characteristicObjects[index]
+            self.cache.characteristics[characteristic] = characteristicObject
+        }
+        return characteristics
+    }
+    
+    /// Read Characteristic Value
+    public func readValue(
+        for characteristic: Characteristic<Peripheral, AttributeID>
+    ) async throws -> Data {
+        fatalError()
+    }
+    
+    /// Write Characteristic Value
+    public func writeValue(
+        _ data: Data,
+        for characteristic: Characteristic<Peripheral, AttributeID>,
+        withResponse: Bool
+    ) async throws {
+        
+    }
+    
+    /// Discover descriptors
+    public func discoverDescriptors(
+        for characteristic: Characteristic<Peripheral, AttributeID>
+    ) async throws -> [Descriptor<Peripheral, AttributeID>] {
+        fatalError()
+    }
+    
+    /// Read descriptor
+    public func readValue(
+        for descriptor: Descriptor<Peripheral, AttributeID>
+    ) async throws -> Data {
+        fatalError()
+    }
+    
+    /// Write descriptor
+    public func writeValue(
+        _ data: Data,
+        for descriptor: Descriptor<Peripheral, AttributeID>
+    ) async throws {
+        
+    }
+    
+    /// Start Notifications
+    public func notify(
+        for characteristic: Characteristic<Peripheral, AttributeID>
+    ) async throws -> AsyncThrowingStream<Data, Error> {
+        fatalError()
+    }
+    
+    // Stop Notifications
+    public func stopNotifications(for characteristic: Characteristic<Peripheral, AttributeID>) async throws {
+        
+    }
+    
+    /// Read MTU
+    public func maximumTransmissionUnit(for peripheral: Peripheral) async throws -> MaximumTransmissionUnit {
+        return .default
+    }
 }
+
+// MARK: - Supporting Types
 
 public extension WebCentral {
     
@@ -48,6 +213,8 @@ public extension WebCentral {
         
         public let id: String
     }
+    
+    typealias AttributeID = BluetoothUUID
     
     struct Advertisement: AdvertisementData {
         
@@ -69,5 +236,17 @@ public extension WebCentral {
         
         /// An array of one or more `BluetoothUUID`, representing Service UUIDs.
         public var solicitedServiceUUIDs: [BluetoothUUID]? { return nil }
+    }
+}
+
+internal extension WebCentral {
+    
+    struct Cache {
+        
+        var devices = [Peripheral: JSBluetoothDevice]()
+        
+        var services = [Service<Peripheral, AttributeID>: JSBluetoothRemoteGATTService]()
+        
+        var characteristics = [Characteristic<Peripheral, AttributeID>: JSBluetoothRemoteGATTCharacteristic]()
     }
 }
