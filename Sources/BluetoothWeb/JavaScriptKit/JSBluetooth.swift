@@ -71,10 +71,10 @@ public final class JSBluetooth: JSBridgedClass {
     /// If there is no chooser UI, this method returns the first device matching the criteria.
     ///
     /// - Returns: A Promise to a `BluetoothDevice` object.
-    public func requestDevice() async throws -> JSBluetoothDevice {
+    public func requestDevice(services: [BluetoothUUID]) async throws -> JSBluetoothDevice {
         let options = RequestDeviceOptions(
             filters: nil,
-            optionalServices: nil,
+            optionalServices: services,
             acceptAllDevices: true
         )
         return try await requestDevice(options: options)
@@ -93,7 +93,8 @@ public final class JSBluetooth: JSBridgedClass {
         
         // TODO: Customize options
         let optionsArg: [String: ConvertibleToJSValue] = [
-            "acceptAllDevices": true
+            "acceptAllDevices": true,
+            "optionalServices": options.optionalServices ?? [] as [ConvertibleToJSValue]
         ]
         guard let function = jsObject.requestDevice.function
             else { fatalError("Invalid function \(#function)") }
@@ -110,13 +111,13 @@ public extension JSBluetooth {
     
     struct ScanFilter: Equatable, Hashable, Codable {
                 
-        public var services: [String]?
+        public var services: [BluetoothUUID]?
         
         public var name: String?
         
         public var namePrefix: String?
         
-        public init(services: [String]? = nil,
+        public init(services: [BluetoothUUID]? = nil,
                     name: String? = nil,
                     namePrefix: String? = nil) {
             self.services = services
@@ -132,7 +133,7 @@ public extension JSBluetooth {
         
         var filters: [ScanFilter]?
         
-        var optionalServices: [String]?
+        var optionalServices: [BluetoothUUID]?
         
         var acceptAllDevices: Bool?
     }

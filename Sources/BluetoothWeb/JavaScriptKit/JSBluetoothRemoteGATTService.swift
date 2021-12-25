@@ -28,13 +28,13 @@ public final class JSBluetoothRemoteGATTService: JSBridgedClass {
     
     // MARK: - Accessors
         
-    public lazy var uuid: String = jsObject.uuid.string!
+    public lazy var uuid: BluetoothUUID = .construct(from: jsObject.uuid)!
     
     public lazy var isPrimary: Bool = jsObject.isPrimary.boolean ?? false
     
     // MARK: - Methods
     
-    public func characteristic(for uuid: String) async throws -> JSBluetoothRemoteGATTCharacteristic {
+    public func characteristic(for uuid: BluetoothUUID) async throws -> JSBluetoothRemoteGATTCharacteristic {
         guard let function = jsObject.getCharacteristic.function
             else { fatalError("Missing function \(#function)") }
         let result = function.callAsFunction(this: jsObject, uuid)

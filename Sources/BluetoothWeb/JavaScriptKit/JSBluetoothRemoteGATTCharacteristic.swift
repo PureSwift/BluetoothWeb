@@ -35,12 +35,12 @@ public final class JSBluetoothRemoteGATTCharacteristic: JSBridgedClass {
     }
     
     // MARK: - Accessors
-        
-    public lazy var uuid: String = jsObject.uuid.string!
+
+    public lazy var uuid: BluetoothUUID = .construct(from: jsObject.uuid)!
     
     // MARK: - Methods
     
-    public func descriptor(for uuid: String) async throws -> JSBluetoothRemoteGATTDescriptor {
+    public func descriptor(for uuid: BluetoothUUID) async throws -> JSBluetoothRemoteGATTDescriptor {
         guard let function = jsObject.getDescriptor.function
             else { fatalError("Missing function \(#function)") }
         let result = function.callAsFunction(this: jsObject, uuid)

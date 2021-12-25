@@ -36,7 +36,7 @@ public final class JSBluetoothRemoteGATTDescriptor: JSBridgedClass {
     
     // MARK: - Accessors
     
-    public lazy var uuid: String = jsObject.uuid.string!
+    public lazy var uuid: BluetoothUUID = .construct(from: jsObject.uuid)!
     
     // MARK: - Methods
     

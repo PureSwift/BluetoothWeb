@@ -59,7 +59,7 @@ public final class JSBluetoothRemoteGATTServer: JSBridgedClass {
     /// Returns a promise to the primary BluetoothGATTService offered by the bluetooth device for a specified BluetoothServiceUUID.
     ///
     /// - Parameter uuid: A Bluetooth service universally unique identifier for a specified device.
-    public func primaryService(for uuid: String) async throws -> JSBluetoothRemoteGATTService {
+    public func primaryService(for uuid: BluetoothUUID) async throws -> JSBluetoothRemoteGATTService {
         guard let function = jsObject.getPrimaryService.function
             else { fatalError("Missing function \(#function)") }
         let result = function.callAsFunction(this: jsObject, uuid)
