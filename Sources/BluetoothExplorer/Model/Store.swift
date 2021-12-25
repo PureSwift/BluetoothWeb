@@ -79,12 +79,7 @@ final class Store: ObservableObject {
     }
     
     func scan() async throws -> Peripheral {
-        // TODO: Scan for all known services
-        let serviceUUIDs: Set<BluetoothUUID> = [
-            .deviceInformation,
-            .batteryService,
-            .currentTimeService,
-        ]
+        let serviceUUIDs: Set<BluetoothUUID> = Set(definedUUIDs.keys.map { .bit16($0) })
         //scanResults.removeAll(keepingCapacity: true)
         let scanData = try await central.scan(with: serviceUUIDs)
         scanResults[scanData.peripheral] = scanData
@@ -103,34 +98,18 @@ final class Store: ObservableObject {
     }
     
     func discoverServices(for peripheral: Central.Peripheral) async throws {
-        // TODO: Scan for all known services
-        let serviceUUIDs: Set<BluetoothUUID> = [
-            .deviceInformation,
-            .batteryService,
-            .currentTimeService,
-        ]
+        let serviceUUIDs: Set<BluetoothUUID> = Set(definedUUIDs.keys.map { .bit16($0) })
         activity[peripheral] = true
         defer { activity[peripheral] = false }
         let services = try await central.discoverServices(serviceUUIDs, for: peripheral)
-        print(services)
         self.services[peripheral] = services
     }
     
     func discoverCharacteristics(for service: Service) async throws {
-        // TODO: Scan for all known characteristics
-        let characteristicUUIDs: Set<BluetoothUUID> = [
-            .batteryLevel,
-            .modelNumberString,
-            .manufacturerNameString,
-            .hardwareRevisionString,
-            .softwareRevisionString,
-            .firmwareRevisionString,
-            .currentTime
-        ]
+        let characteristicUUIDs: Set<BluetoothUUID> = Set(definedUUIDs.keys.map { .bit16($0) })
         activity[service.peripheral] = true
         defer { activity[service.peripheral] = false }
         let characteristics = try await central.discoverCharacteristics(characteristicUUIDs, for: service)
-        print(characteristics)
         self.characteristics[service] = characteristics
     }
     

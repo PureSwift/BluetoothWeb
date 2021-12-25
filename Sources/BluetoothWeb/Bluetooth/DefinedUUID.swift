@@ -25,7 +25,7 @@ public extension BluetoothUUID {
 }
 
 /// https://www.bluetooth.com/specifications/assigned-numbers/16-bit-uuids-for-members
-internal let definedUUIDs: [UInt16: String] = [
+public let definedUUIDs: [UInt16: String] = [
     
     0x0001: "SDP",
     0x0003: "RFCOMM",
