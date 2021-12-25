@@ -36,17 +36,21 @@ struct PeripheralView: View {
                 OutlineGroup(groups, children: \.children) { group in
                     switch group {
                     case let .service(serviceGroup):
-                        AnyView(
-                            Text(verbatim: serviceGroup.service.uuid.description)
-                        )
+                        VStack(alignment: .leading, spacing: 5) {
+                            AnyView(
+                                Text(verbatim: serviceGroup.service.uuid.description)
+                            )
+                        }
                     case let .characteristic(characteristicGroup):
-                        AnyView(
-                            Button(action: {
-                                select(characteristicGroup.characteristic)
-                            }, label: {
-                                Text(verbatim: characteristicGroup.characteristic.uuid.description)
-                            })
-                        )
+                        VStack(alignment: .leading, spacing: 5) {
+                            AnyView(
+                                Button(action: {
+                                    select(characteristicGroup.characteristic)
+                                }, label: {
+                                    Text(verbatim: characteristicGroup.characteristic.uuid.description)
+                                })
+                            )
+                        }
                     }
                 }
             }
@@ -205,8 +209,9 @@ extension PeripheralView {
     }
     
     func showError(_ error: Error) {
-        print(error)
+        dump(error)
         self.error = error.localizedDescription
+        store.disconnect(peripheral)
     }
     
     func disconnect() {
