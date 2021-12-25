@@ -31,21 +31,8 @@ struct AttributeValueCell: View {
 
 extension AttributeValueCell {
     
-    static let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .medium
-        return formatter
-    }()
-    
-    static let byteCountFormatter: ByteCountFormatter = {
-        let formatter = ByteCountFormatter()
-        formatter.countStyle = .memory
-        return formatter
-    }()
-    
     var date: String {
-        Self.dateFormatter.string(from: attributeValue.date)
+        return JSDate(millisecondsSinceEpoch: attributeValue.date.timeIntervalSince1970 * 1000).toUTCString()
     }
     
     var type: String {
@@ -70,7 +57,7 @@ extension AttributeValueCell {
             return AnyView(
                 VStack(alignment: .leading, spacing: nil) {
                     Text(verbatim: "0x" + attributeValue.data.toHexadecimal())
-                    Text(verbatim: Self.byteCountFormatter.string(fromByteCount: numericCast(attributeValue.data.count)))
+                    Text(verbatim: "\(attributeValue.data.count) bytes")
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
