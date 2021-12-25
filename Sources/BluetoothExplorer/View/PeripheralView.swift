@@ -48,6 +48,7 @@ struct PeripheralView: View {
                     )
                 }
             }
+            .buttonStyle(BorderlessButtonStyle())
             // Detail view
             if let characteristic = self.selection {
                 CharacteristicView(characteristic: characteristic)

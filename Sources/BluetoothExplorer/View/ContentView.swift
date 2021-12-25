@@ -40,20 +40,17 @@ struct ContentView: View {
                         HStack(alignment: .center, spacing: nil) {
                             Spacer()
                             VStack(alignment: .center, spacing: nil) {
-                                Button("Scan") {
-                                    Task { await scan() }
-                                }
+                                scanButton
                                 PeripheralView(peripheral: peripheral)
-                            }.padding()
+                            }
+                            .padding()
                             Spacer()
                         }
                     }
                 )
             } else {
                 AnyView(
-                    Button("Scan") {
-                        Task { await scan() }
-                    }.padding()
+                    scanButton
                 )
             }
         }
@@ -61,6 +58,16 @@ struct ContentView: View {
 }
 
 extension ContentView {
+    
+    var scanButton: some View {
+        Button(action: {
+            Task { await scan() }
+        }, label: {
+            Text("Scan")
+                .padding()
+        })
+        .padding()
+    }
     
     func checkSupportedBrowser() async {
         isSupported = await WebCentral.shared?.isAvailable ?? false
