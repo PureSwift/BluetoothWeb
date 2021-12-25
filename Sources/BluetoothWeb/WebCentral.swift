@@ -6,8 +6,9 @@
 //
 
 import Foundation
+@_exported import Bluetooth
+@_exported import GATT
 import JavaScriptKit
-// import Bluetooth
 
 /// [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
 public final class WebCentral { //: CentralManager {
@@ -337,7 +338,7 @@ extension BluetoothUUID: ConstructibleFromJSValue {
         var string = string.uppercased()
         let suffix = "-0000-1000-8000-00805F9B34FB"
         let prefix = "0000"
-        if string.count == UUID.stringLength,
+        if string.count == 36,
            string.hasSuffix(suffix),
             string.hasPrefix(prefix) {
             string.removeFirst(prefix.count)

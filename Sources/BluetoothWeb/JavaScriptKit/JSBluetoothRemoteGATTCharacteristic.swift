@@ -7,6 +7,7 @@
 
 import Foundation
 import JavaScriptKit
+import Bluetooth
 
 /**
  JavaScript Bluetooth GATT Characteristic

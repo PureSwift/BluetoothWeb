@@ -16,9 +16,19 @@ let package = Package(
     dependencies: [
         .package(
             name: "Tokamak",
-            url: "https://github.com/TokamakUI/Tokamak",
+            url: "https://github.com/TokamakUI/Tokamak.git",
             from: "0.9.0"
-        )
+        ),
+        .package(
+            name: "Bluetooth",
+            url: "https://github.com/PureSwift/Bluetooth.git",
+            .branch("feature/async")
+        ),
+        .package(
+            name: "GATT",
+            url: "https://github.com/PureSwift/GATT.git",
+            .branch("feature/async")
+        ),
     ],
     targets: [
         .executableTarget(
@@ -37,6 +47,14 @@ let package = Package(
                 .product(
                     name: "TokamakShim",
                     package: "Tokamak"
+                ),
+                .product(
+                    name: "Bluetooth",
+                    package: "Bluetooth"
+                ),
+                .product(
+                    name: "GATT",
+                    package: "GATT"
                 ),
             ]
         )
