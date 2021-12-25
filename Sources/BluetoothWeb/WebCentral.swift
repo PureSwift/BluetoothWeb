@@ -98,16 +98,33 @@ public final class WebCentral { //: CentralManager {
         var services = [Service<Peripheral, AttributeID>: JSBluetoothRemoteGATTService]()
         services.reserveCapacity(serviceUUIDs.count)
         for uuid in serviceUUIDs {
-            let serviceObject = try await device.remoteServer.primaryService(for: uuid)
-            let service = Service(
-                id: newAttributeID(for: peripheral),
-                uuid: serviceObject.uuid,
-                peripheral: peripheral,
-                isPrimary: serviceObject.isPrimary
-            )
-            services[service] = serviceObject
-            // cache
-            self.cache.services[service] = serviceObject
+            do {
+                let serviceObject = try await device.remoteServer.primaryService(for: uuid)
+                let service = Service(
+                    id: newAttributeID(for: peripheral),
+                    uuid: serviceObject.uuid,
+                    peripheral: peripheral,
+                    isPrimary: serviceObject.isPrimary
+                )
+                services[service] = serviceObject
+                // cache
+                self.cache.services[service] = serviceObject
+            }
+            catch let error as JSError {
+                if error.name == "NotFoundError" {
+                    continue
+                }
+                throw error
+            }
+            catch let error as JSValue {
+                if error.NotFoundError != nil {
+                    continue
+                }
+                throw error
+            }
+            catch {
+                throw error
+            }
         }
         return services.keys.sorted(by: { $0.id < $1.id })
     }
@@ -146,24 +163,18 @@ public final class WebCentral { //: CentralManager {
                 self.cache.characteristics[characteristic] = characteristicObject
             }
             catch let error as JSError {
-                print(#function, #line)
-                dump(error)
                 if error.name == "NotFoundError" {
                     continue
                 }
                 throw error
             }
             catch let error as JSValue {
-                print(#function, #line)
-                dump(error)
                 if error.NotFoundError != nil {
                     continue
                 }
                 throw error
             }
             catch {
-                print(#function, #line)
-                dump(error)
                 throw error
             }
         }
