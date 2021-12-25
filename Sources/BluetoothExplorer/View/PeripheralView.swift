@@ -17,11 +17,21 @@ struct PeripheralView: View {
     
     let peripheral: Store.Peripheral
     
+    @State
+    var selection: Store.Characteristic?
+    
+    @State
+    var error: String?
+    
     var body: some View {
-        VStack {
+        VStack(alignment: .center, spacing: 5) {
+            // name
             if let name = scanData?.advertisementData.localName {
                 Text(verbatim: name)
             }
+            // Detail view
+            statusView
+            // GATT
             OutlineGroup(groups, children: \.children) { group in
                 switch group {
                 case let .service(serviceGroup):
@@ -30,14 +40,19 @@ struct PeripheralView: View {
                     )
                 case let .characteristic(characteristicGroup):
                     AnyView(
-                        NavigationLink(
-                            characteristicGroup.characteristic.uuid.description,
-                            destination: CharacteristicView(characteristic: characteristicGroup.characteristic)
-                        )
+                        Button(action: {
+                            select(characteristicGroup.characteristic)
+                        }, label: {
+                            Text(verbatim: characteristicGroup.characteristic.uuid.description)
+                        })
                     )
                 }
             }
-        }
+            // Detail view
+            if let characteristic = self.selection {
+                CharacteristicView(characteristic: characteristic)
+            }
+        }.padding()
     }
 }
 
@@ -104,6 +119,39 @@ extension PeripheralView {
         }
     }
     
+    var isConnected: Bool {
+        store.connected.contains(peripheral)
+    }
+    
+    var showActivity: Bool {
+        store.activity[peripheral] ?? false
+    }
+    
+    var statusView: some View {
+        VStack {
+            HStack {
+                if isConnected {
+                    Button(action: {
+                        disconnect()
+                    }, label: {
+                        Text("Connected ✅")
+                    })
+                } else {
+                    Button(action: {
+                        Task { await connect() }
+                    }, label: {
+                        Text("Disconnected 🚫")
+                    })
+                }
+            }
+            .buttonStyle(BorderlessButtonStyle())
+            // error
+            if let error = self.error {
+                Text("⚠️ \(error)")
+            }
+        }
+    }
+    
     var scanData: ScanData<WebCentral.Peripheral, WebCentral.Advertisement>? {
         store.scanResults[peripheral]
     }
@@ -132,7 +180,14 @@ extension PeripheralView {
         }
     }
     
+    func select(_ characteristic: Store.Characteristic) {
+        self.error = nil
+        print("Selected \(characteristic.uuid.description)")
+        self.selection = characteristic
+    }
+    
     func connect() async {
+        self.error = nil
         do {
             try await store.connect(to: peripheral)
             try await store.discoverServices(for: peripheral)
@@ -140,10 +195,19 @@ extension PeripheralView {
             for service in peripherals {
                 try await store.discoverCharacteristics(for: service)
             }
-            
         }
         catch {
-            print(error)
+            showError(error)
         }
+    }
+    
+    func showError(_ error: Error) {
+        print(error)
+        self.error = error.localizedDescription
+    }
+    
+    func disconnect() {
+        self.error = nil
+        store.disconnect(peripheral)
     }
 }

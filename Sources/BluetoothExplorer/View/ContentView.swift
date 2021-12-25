@@ -36,12 +36,16 @@ struct ContentView: View {
                 AnyView(Text("Scanning for devices..."))
             } else if let peripheral = device {
                 AnyView(
-                    NavigationView {
-                        VStack {
-                            Button("Scan") {
-                                Task { await scan() }
-                            }
-                            PeripheralView(peripheral: peripheral)
+                    ScrollView {
+                        HStack(alignment: .center, spacing: nil) {
+                            Spacer()
+                            VStack(alignment: .center, spacing: nil) {
+                                Button("Scan") {
+                                    Task { await scan() }
+                                }
+                                PeripheralView(peripheral: peripheral)
+                            }.padding()
+                            Spacer()
                         }
                     }
                 )
@@ -69,13 +73,6 @@ extension ContentView {
             // show device UI
             self.device = peripheral
             print("Selected \(peripheral)")
-            // load GATT
-            try await store.connect(to: peripheral)
-            try await store.discoverServices(for: peripheral)
-            let services = store.services[peripheral] ?? []
-            for service in services {
-                try await store.discoverCharacteristics(for: service)
-            }
         }
         catch { print(error) }
     }

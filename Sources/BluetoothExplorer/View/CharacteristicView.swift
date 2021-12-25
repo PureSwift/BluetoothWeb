@@ -24,34 +24,28 @@ struct CharacteristicView: View {
     var willWriteWithResponse = true
     
     var body: some View {
-        List {
-            VStack(alignment: .leading, spacing: nil) {
-                Text(verbatim: characteristic.uuid.rawValue)
-                    .font(.title)
-            }
+        VStack {
             if actions.isEmpty == false {
-                Section {
-                    if canPerform(.read) {
-                        Button("Read") {
-                            Task { await read() }
-                        }
+                if canPerform(.read) {
+                    Button("Read") {
+                        Task { await read() }
                     }
-                    if canPerform(.write) {
-                        Button("Write") {
-                            willWriteWithResponse = true
-                            showSheet = true
-                        }
+                }
+                if canPerform(.write) {
+                    Button("Write") {
+                        willWriteWithResponse = true
+                        showSheet = true
                     }
-                    if canPerform(.writeWithoutResponse) {
-                        Button("Write without response") {
-                            willWriteWithResponse = false
-                            showSheet = true
-                        }
+                }
+                if canPerform(.writeWithoutResponse) {
+                    Button("Write without response") {
+                        willWriteWithResponse = false
+                        showSheet = true
                     }
-                    if canPerform(.notify) {
-                        Button(notifyActionTitle) {
-                            Task { await notify() }
-                        }
+                }
+                if canPerform(.notify) {
+                    Button(notifyActionTitle) {
+                        Task { await notify() }
                     }
                 }
             }
