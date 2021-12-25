@@ -9,22 +9,38 @@
 import JavaScriptKit
 
 /// JavaScript Bluetooth Device object.
-public final class JSBluetoothDevice {
+public final class JSBluetoothDevice: JSBridgedClass {
+    
+    public static let constructor = JSObject.global.BluetoothDevice.function!
     
     // MARK: - Properties
     
-    internal let jsObject: JSObject
+    public let jsObject: JSObject
     
     // MARK: - Initialization
 
-    internal init?(_ jsObject: JSObject) {
+    public required convenience init?(from value: JSValue) {
+        guard let object = value.object else { return nil }
+        self.init(object)
+    }
+
+    /// Construct a `JSArray` from Array `JSObject`.
+    /// Return `nil` if the object is not an Array.
+    ///
+    /// - Parameter object: A `JSObject` expected to be a JavaScript Array
+    public convenience init?(_ jsObject: JSObject) {
+        //guard Self.validate(jsObject) else { return nil }
+        self.init(unsafelyWrapping: jsObject)
+    }
+
+    public required init(unsafelyWrapping jsObject: JSObject) {
         self.jsObject = jsObject
     }
     
     // MARK: - Accessors
     
     /// A string that uniquely identifies a device.
-    public lazy var id: String = self.jsObject["id"].string!
+    public lazy var id: String = self.jsObject["id"].string ?? "Error"
     
     /// A string that provices a human-readable name for the device.
     public var name: String? {

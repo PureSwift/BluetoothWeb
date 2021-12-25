@@ -44,13 +44,23 @@ public final class JSBluetooth {
     
     /**
      Returns a `Promise` that resolved to an array of `BluetoothDevice` which the origin already obtained permission for via a call to `Bluetooth.requestDevice()`.
+     
+    - SeeAlso: [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Bluetooth/getDevices)
      */
-    public var devices: JSPromise {
-        /*
-        guard let function = jsObject.getDevices.function
-            else { fatalError("Invalid function \(#function)") }
-        */
-       fatalError()
+    public var devices: [JSBluetoothDevice] {
+        get async {
+            guard let function = jsObject.getDevices.function,
+                  let promise = function.callAsFunction(this: jsObject).object.flatMap({ JSPromise($0) })
+                else { fatalError("Invalid function \(#function)") }
+            do {
+                let result = try await promise.get()
+                let array = JSArray(unsafelyWrapping: result.object!)
+                return array.map { JSBluetoothDevice(unsafelyWrapping: $0.object!) }
+            }
+            catch {
+                return []
+            }
+        }
     }
     
     // MARK: - Methods
@@ -59,13 +69,13 @@ public final class JSBluetooth {
     /// If there is no chooser UI, this method returns the first device matching the criteria.
     ///
     /// - Returns: A Promise to a `BluetoothDevice` object.
-    public func requestDevice() async -> JSBluetoothDevice {
+    public func requestDevice() async throws -> JSBluetoothDevice? {
         let options = RequestDeviceOptions(
             filters: nil,
             optionalServices: nil,
             acceptAllDevices: true
         )
-        return await requestDevice(options: options)
+        return try await requestDevice(options: options)
     }
     
     /// Returns a Promise to a BluetoothDevice object with the specified options.
@@ -74,19 +84,21 @@ public final class JSBluetooth {
     /// - Returns: A Promise to a `BluetoothDevice` object.
     internal func requestDevice(
         options: RequestDeviceOptions
-    ) async -> JSBluetoothDevice {
+    ) async throws -> JSBluetoothDevice? {
         
         // Bluetooth.requestDevice([options])
         // .then(function(bluetoothDevice) { ... })
-        /*
+        
+        // TODO: Customize options
+        let optionsArg: [String: ConvertibleToJSValue] = [
+            "acceptAllDevices": true
+        ]
         guard let function = jsObject.requestDevice.function
             else { fatalError("Invalid function \(#function)") }
-        let result = function.apply(this: jsObject, arguments: options)
+        let result = function.callAsFunction(this: jsObject, arguments: [optionsArg])
         guard let promise = result.object.flatMap({ JSPromise($0) })
             else { fatalError("Invalid object \(result)") }
-        return promise
-         */
-        fatalError()
+        return try await promise.get().object.flatMap({ JSBluetoothDevice($0) })
     }
 }
 
@@ -112,7 +124,7 @@ public extension JSBluetooth {
     }
 }
 
-internal extension JSBluetooth {
+public extension JSBluetooth {
     
     struct RequestDeviceOptions: Encodable {
         

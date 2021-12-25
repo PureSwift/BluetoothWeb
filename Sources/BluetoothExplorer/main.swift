@@ -14,7 +14,10 @@ struct WebApp: App {
 struct ContentView: View {
     
     @State
-    var didTouch = false
+    var devices = [WebCentral.Peripheral]()
+    
+    @State
+    var isScanning = false
     
     @State
     var isSupported: Bool?
@@ -27,16 +30,36 @@ struct ContentView: View {
         case .some(false):
             AnyView(UnsupportedView())
         case .some(true):
-            AnyView (
-                VStack(alignment: .center, spacing: nil) {
-                    Text(didTouch ?  "Don't touch me\n\(BluetoothUUID().description)" : "Hello, Swift")
-                    Button("Touch me") {
-                        Task {
-                            didTouch.toggle()
+            if isScanning {
+                AnyView(Text("Scanning for devices"))
+            } else {
+                VStack {
+                    Button("Scan") {
+                        Task { await scan() }
+                    }
+                    List {
+                        ForEach(devices) { device in
+                            Text(verbatim: device.id)
                         }
                     }
+                    /*
+                    NavigationView {
+                        List {
+                            ForEach(devices) { device in
+                                Text(verbatim: device.id)
+                                /*
+                                NavigationLink(
+                                    destination: Text(verbatim: device.id),
+                                    label: {
+                                        Text(verbatim: device.id)
+                                    }
+                                )*/
+                            }
+                        }
+                    }*/
                 }
-            )
+                .navigationTitle("Central")
+            }
         }
     }
 }
@@ -45,6 +68,21 @@ extension ContentView {
     
     func checkSupportedBrowser() async {
         isSupported = await WebCentral.shared?.isAvailable ?? false
+    }
+    
+    func scan() async {
+        devices = []
+        do {
+            /*
+            let stream = try await WebCentral.shared!.scan()
+            for try await device in stream {
+                devices.append(device)
+            }*/
+            devices = try await WebCentral.shared!.scan()
+        }
+        catch {
+            print(error)
+        }
     }
 }
 
