@@ -63,7 +63,8 @@ extension ContentView {
             // select device
             let peripheral = try await store.scan()
             // show device UI
-            self.device = device
+            self.device = peripheral
+            print("Selected \(peripheral)")
             // load GATT
             try await store.connect(to: peripheral)
             try await store.discoverServices(for: peripheral)
