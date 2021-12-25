@@ -6,6 +6,7 @@
 //
 
 import Foundation
+// import Bluetooth
 
 public final class WebCentral { //: CentralManager {
     
@@ -29,36 +30,44 @@ public final class WebCentral { //: CentralManager {
         }
     }
     
-    public func scan() async throws -> AsyncThrowingStream<Peripheral, Error> {
+    public func scan() async throws -> ScanData<Peripheral, Advertisement> {
         let device = try await bluetooth.requestDevice()
-        print(device)
-        return AsyncThrowingStream<Peripheral, Error> { continuation in
-            Task {
-                let devices = [device].compactMap { $0 } //await bluetooth.devices
-                    .map { Peripheral(id: $0.id) }
-                devices.forEach {
-                    continuation.yield($0)
-                }
-                continuation.finish(throwing: nil)
-            }
-        }
-    }
-    
-    public func scan() async throws -> [Peripheral] {
-        guard let device = try await bluetooth.requestDevice() else {
-            return []
-        }
-        return [device].map {
-            Peripheral(id: $0.id)
-            
-        }
+        return ScanData(
+            peripheral: Peripheral(id: device.id),
+            date: Date(),
+            rssi: -127,
+            advertisementData: Advertisement(localName: device.name),
+            isConnectable: true
+        )
     }
 }
 
 public extension WebCentral {
     
-    struct Peripheral: Equatable, Hashable, Identifiable { // Peer
+    struct Peripheral: Peer, Identifiable {
         
         public let id: String
+    }
+    
+    struct Advertisement: AdvertisementData {
+        
+        /// The local name of a peripheral.
+        public let localName: String?
+        
+        /// The Manufacturer data of a peripheral.
+        public var manufacturerData: ManufacturerSpecificData? { return nil }
+        
+        /// This value is available if the broadcaster (peripheral) provides its Tx power level in its advertising packet.
+        /// Using the RSSI value and the Tx power level, it is possible to calculate path loss.
+        public var txPowerLevel: Double? { return nil }
+        
+        /// Service-specific advertisement data.
+        public var serviceData: [BluetoothUUID: Data]? { return nil }
+        
+        /// An array of service UUIDs
+        public var serviceUUIDs: [BluetoothUUID]? { return nil }
+        
+        /// An array of one or more `BluetoothUUID`, representing Service UUIDs.
+        public var solicitedServiceUUIDs: [BluetoothUUID]? { return nil }
     }
 }

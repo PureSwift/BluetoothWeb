@@ -14,7 +14,7 @@ struct WebApp: App {
 struct ContentView: View {
     
     @State
-    var devices = [WebCentral.Peripheral]()
+    var device: ScanData<WebCentral.Peripheral, WebCentral.Advertisement>?
     
     @State
     var isScanning = false
@@ -37,9 +37,10 @@ struct ContentView: View {
                     Button("Scan") {
                         Task { await scan() }
                     }
-                    List {
-                        ForEach(devices) { device in
-                            Text(verbatim: device.id)
+                    if let device = self.device {
+                        Text(verbatim: device.id)
+                        if let name = device.advertisementData.localName {
+                            Text(verbatim: name)
                         }
                     }
                     /*
@@ -66,23 +67,21 @@ struct ContentView: View {
 
 extension ContentView {
     
+    var central: WebCentral? {
+        return WebCentral.shared
+    }
+    
     func checkSupportedBrowser() async {
         isSupported = await WebCentral.shared?.isAvailable ?? false
     }
     
     func scan() async {
-        devices = []
-        do {
-            /*
-            let stream = try await WebCentral.shared!.scan()
-            for try await device in stream {
-                devices.append(device)
-            }*/
-            devices = try await WebCentral.shared!.scan()
+        guard let central = self.central else {
+            assertionFailure("Not supported")
+            return
         }
-        catch {
-            print(error)
-        }
+        do { device = try await central.scan() }
+        catch { print(error) }
     }
 }
 
