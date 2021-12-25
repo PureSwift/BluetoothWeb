@@ -51,4 +51,17 @@ public final class JSBluetoothRemoteGATTCharacteristic: JSBridgedClass {
         let value = try await promise.get()
         return value.object.flatMap({ JSBluetoothRemoteGATTDescriptor(unsafelyWrapping: $0, characteristic: self) })!
     }
+    
+    /*
+     The `BluetoothRemoteGATTCharacteristic.readValue()` method returns a `Promise` that resolves to a `DataView` holding a duplicate of the value property if it is available and supported. Otherwise it throws an error.
+     */
+    public func readValue() async throws -> JSDataView {
+        guard let function = jsObject.readValue.function
+            else { fatalError("Missing function \(#function)") }
+        let result = function.callAsFunction(this: jsObject)
+        guard let promise = result.object.flatMap({ JSPromise($0) })
+            else { fatalError("Invalid object \(result)") }
+        let value = try await promise.get()
+        return value.object.flatMap({ JSDataView(unsafelyWrapping: $0) })!
+    }
 }

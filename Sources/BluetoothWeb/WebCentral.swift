@@ -156,7 +156,14 @@ public final class WebCentral { //: CentralManager {
     public func readValue(
         for characteristic: Characteristic<Peripheral, AttributeID>
     ) async throws -> Data {
-        fatalError()
+        guard let _ = self.cache.devices[characteristic.peripheral] else {
+            throw CentralError.unknownPeripheral
+        }
+        guard let characteristicObject = self.cache.characteristics[characteristic] else {
+            throw CentralError.invalidAttribute(characteristic.uuid)
+        }
+        let dataView = try await characteristicObject.readValue()
+        return Data(dataView)
     }
     
     /// Write Characteristic Value
