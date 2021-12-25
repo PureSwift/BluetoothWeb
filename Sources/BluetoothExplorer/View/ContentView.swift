@@ -59,7 +59,19 @@ extension ContentView {
     }
     
     func scan() async {
-        do { device = try await store.scan() }
+        do {
+            // select device
+            let peripheral = try await store.scan()
+            // show device UI
+            self.device = device
+            // load GATT
+            try await store.connect(to: peripheral)
+            try await store.discoverServices(for: peripheral)
+            let services = store.services[peripheral] ?? []
+            for service in services {
+                try await store.discoverCharacteristics(for: service)
+            }
+        }
         catch { print(error) }
     }
 }

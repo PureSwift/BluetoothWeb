@@ -53,16 +53,24 @@ final class Store: ObservableObject {
     @Published
     private(set) var isNotifying = [Characteristic: Bool]()
     
-    private let central: Central
+    private var central: Central {
+        guard let central = WebCentral.shared else {
+            fatalError("Missing central")
+        }
+        return central
+    }
     
     // MARK: - Initialization
-    
+    /*
     init(central: Central) {
         self.central = central
         observeValues()
     }
+    */
     
-    static let shared = Store(central: .shared!)
+    private init() { }
+    
+    static let shared = Store()
     
     // MARK: - Methods
     
@@ -71,8 +79,13 @@ final class Store: ObservableObject {
     }
     
     func scan() async throws -> Peripheral {
+        // TODO: Scan for all known services
+        let serviceUUIDs: Set<BluetoothUUID> = [
+            .bit16(0x180A),     // Device Information (`0x180A`)
+            //.bit16(0x180F)      // Battery Service (`0x180F`)
+        ]
         //scanResults.removeAll(keepingCapacity: true)
-        let scanData = try await central.scan()
+        let scanData = try await central.scan(with: serviceUUIDs)
         scanResults[scanData.peripheral] = scanData
         return scanData.peripheral
     }
@@ -92,23 +105,25 @@ final class Store: ObservableObject {
         // TODO: Scan for all known services
         let serviceUUIDs: Set<BluetoothUUID> = [
             .bit16(0x180A),     // Device Information (`0x180A`)
-            .bit16(0x180F)      // Battery Service (`0x180F`)
+            //.bit16(0x180F)      // Battery Service (`0x180F`)
         ]
         activity[peripheral] = true
         defer { activity[peripheral] = false }
         let services = try await central.discoverServices(serviceUUIDs, for: peripheral)
+        print(services)
         self.services[peripheral] = services
     }
     
     func discoverCharacteristics(for service: Service) async throws {
         // TODO: Scan for all known characteristics
         let characteristicUUIDs: Set<BluetoothUUID> = [
-            .bit16(0x2A19),     // Battery Level (`0x2A19`)
+            //.bit16(0x2A19),     // Battery Level (`0x2A19`)
             .bit16(0x2A24)      // Model Number String (`0x2A24`)
         ]
         activity[service.peripheral] = true
         defer { activity[service.peripheral] = false }
         let characteristics = try await central.discoverCharacteristics(characteristicUUIDs, for: service)
+        print(characteristics)
         self.characteristics[service] = characteristics
     }
     
