@@ -37,14 +37,19 @@ struct ContentView: View {
             } else {
                 AnyView(
                     NavigationView {
-                        VStack {
-                            Button("Scan") {
-                                Task { await scan() }
+                        AnyView(
+                            VStack(alignment: .center, spacing: nil) {
+                                Button("Scan") {
+                                    Task { await scan() }
+                                }.padding()
+                                if let peripheral = self.device {
+                                    ScrollView {
+                                        PeripheralView(peripheral: peripheral)
+                                    }
+                                }
                             }
-                            if let peripheral = self.device {
-                                PeripheralView(peripheral: peripheral)
-                            }
-                        }
+                            .padding()
+                        )
                     }
                 )
             }
