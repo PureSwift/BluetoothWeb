@@ -278,11 +278,29 @@ extension BluetoothUUID: ConstructibleFromJSValue {
     public static func construct(from value: JSValue) -> BluetoothUUID? {
         switch value {
         case let .string(string):
-            return BluetoothUUID(rawValue: string.description.uppercased())
+            return BluetoothUUID(web: string.description)
         case let .number(number):
             return .bit16(UInt16(number))
         default:
             return nil
+        }
+    }
+    
+    public init?(web string: String) {
+        var string = string.uppercased()
+        let suffix = "-0000-1000-8000-00805F9B34FB"
+        let prefix = "0000"
+        if string.count == UUID.stringLength,
+           string.hasSuffix(suffix),
+            string.hasPrefix(prefix) {
+            string.removeFirst(prefix.count)
+            string.removeLast(suffix.count)
+            guard string.count == 4, let number = UInt16(hexadecimal: string) else {
+                return nil
+            }
+            self = .bit16(number)
+        } else {
+            self.init(rawValue: string)
         }
     }
 }
