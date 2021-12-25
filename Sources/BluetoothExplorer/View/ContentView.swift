@@ -12,8 +12,11 @@ import BluetoothWeb
 
 struct ContentView: View {
     
+    @ObservedObject
+    var store: Store = .shared
+    
     @State
-    var device: ScanData<WebCentral.Peripheral, WebCentral.Advertisement>?
+    var device: WebCentral.Peripheral?
     
     @State
     var isScanning = false
@@ -38,8 +41,8 @@ struct ContentView: View {
                             Button("Scan") {
                                 Task { await scan() }
                             }
-                            if let device = self.device {
-                                PeripheralView(scanData: device)
+                            if let peripheral = self.device {
+                                PeripheralView(peripheral: peripheral)
                             }
                         }
                     }
@@ -51,20 +54,12 @@ struct ContentView: View {
 
 extension ContentView {
     
-    var central: WebCentral? {
-        return WebCentral.shared
-    }
-    
     func checkSupportedBrowser() async {
         isSupported = await WebCentral.shared?.isAvailable ?? false
     }
     
     func scan() async {
-        guard let central = self.central else {
-            assertionFailure("Not supported")
-            return
-        }
-        do { device = try await central.scan() }
+        do { device = try await store.scan() }
         catch { print(error) }
     }
 }

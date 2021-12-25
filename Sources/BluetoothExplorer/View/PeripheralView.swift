@@ -12,14 +12,14 @@ import BluetoothWeb
 
 struct PeripheralView: View {
     
-    let scanData: ScanData<WebCentral.Peripheral, WebCentral.Advertisement>
+    @ObservedObject
+    var store: Store = .shared
     
-    @State
-    var services = [Service<WebCentral.Peripheral, WebCentral.AttributeID>]()
+    let peripheral: Store.Peripheral
     
     var body: some View {
         List {
-            if let name = scanData.advertisementData.localName {
+            if let name = scanData?.advertisementData.localName {
                 Text(verbatim: name)
             }
             if services.isEmpty == false {
@@ -36,10 +36,18 @@ struct PeripheralView: View {
 extension PeripheralView {
     
     var title: some View {
-        if let name = scanData.advertisementData.localName {
+        if let name = scanData?.advertisementData.localName {
             return Text(verbatim: name)
         } else {
             return Text("Device")
         }
+    }
+    
+    var scanData: ScanData<WebCentral.Peripheral, WebCentral.Advertisement>? {
+        store.scanResults[peripheral]
+    }
+    
+    var services: [Service<WebCentral.Peripheral, WebCentral.AttributeID>] {
+        store.services[peripheral] ?? []
     }
 }
