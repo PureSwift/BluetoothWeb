@@ -25,10 +25,7 @@ public protocol CentralManager {
     /// Central Attribute ID (Handle)
     associatedtype AttributeID: Hashable
     
-    /// Log stream
-    //var log: AsyncStream<String> { get }
-    
-    #if arch(wasm32)
+    #if os(WASI)
     func scan() async throws -> ScanData<Peripheral, Advertisement>
     #else
     /// Scans for peripherals that are advertising services.
@@ -38,9 +35,6 @@ public protocol CentralManager {
     func stopScan() async
     #endif
     
-    /// Scanning status
-    //var isScanning: AsyncStream<Bool> { get }
-    
     /// Connect to the specified device
     func connect(to peripheral: Peripheral) async throws
     
@@ -49,9 +43,6 @@ public protocol CentralManager {
     
     /// Disconnect all connected devices.
     func disconnectAll() async
-    
-    /// Disconnected peripheral callback
-    var didDisconnect: AsyncStream<Peripheral> { get }
     
     /// Discover Services
     func discoverServices(
@@ -104,8 +95,10 @@ public protocol CentralManager {
     /// Read MTU
     func maximumTransmissionUnit(for peripheral: Peripheral) async throws -> MaximumTransmissionUnit
     
+    #if !os(WASI)
     // Read RSSI
     func rssi(for peripheral: Peripheral) async throws -> RSSI
+    #endif
 }
 
 #endif

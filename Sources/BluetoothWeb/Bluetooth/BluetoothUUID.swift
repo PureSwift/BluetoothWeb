@@ -30,15 +30,7 @@ public extension BluetoothUUID {
 extension BluetoothUUID: CustomStringConvertible {
     
     public var description: String {
-        #if arch(wasm32)
         return rawValue
-        #else
-        if let name = self.name {
-            return "\(rawValue) (\(name))"
-        } else {
-            return rawValue
-        }
-        #endif
     }
 }
 

@@ -46,10 +46,6 @@ extension CompanyIdentifier: ExpressibleByIntegerLiteral {
 extension CompanyIdentifier: CustomStringConvertible {
     
     public var description: String {
-        #if arch(wasm32)
         return rawValue.description
-        #else
-        return name ?? rawValue.description
-        #endif
     }
 }

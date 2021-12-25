@@ -26,7 +26,7 @@ public enum CentralError: Error {
 
 // MARK: - CustomNSError
 
-#if !arch(wasm32)
+#if !os(WASI)
 extension CentralError: CustomNSError {
     
     public enum UserInfoKey: String {
