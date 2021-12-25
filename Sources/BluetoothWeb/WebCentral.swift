@@ -140,8 +140,8 @@ public final class WebCentral { //: CentralManager {
             Characteristic(
                 id: characteristicObject.uuid,
                 uuid: characteristicObject.uuid,
-                peripheral: service.peripheral, // TODO:
-                properties: [] //characteristicObject.properties
+                peripheral: service.peripheral,
+                properties: characteristicObject.properties.bitmask
             )
         }
         // cache
@@ -172,7 +172,7 @@ public final class WebCentral { //: CentralManager {
     public func discoverDescriptors(
         for characteristic: Characteristic<Peripheral, AttributeID>
     ) async throws -> [Descriptor<Peripheral, AttributeID>] {
-        fatalError()
+        return []
     }
     
     /// Read descriptor

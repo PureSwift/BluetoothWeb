@@ -38,6 +38,8 @@ public final class JSBluetoothRemoteGATTCharacteristic: JSBridgedClass {
 
     public lazy var uuid: BluetoothUUID = .construct(from: jsObject.uuid)!
     
+    public lazy var properties: JSBluetoothCharacteristicProperties = jsObject.properties.object.flatMap({ JSBluetoothCharacteristicProperties(unsafelyWrapping: $0, characteristic: self) })!
+    
     // MARK: - Methods
     
     public func descriptor(for uuid: BluetoothUUID) async throws -> JSBluetoothRemoteGATTDescriptor {
