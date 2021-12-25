@@ -69,7 +69,7 @@ public final class JSBluetooth {
     /// If there is no chooser UI, this method returns the first device matching the criteria.
     ///
     /// - Returns: A Promise to a `BluetoothDevice` object.
-    public func requestDevice() async throws -> JSBluetoothDevice? {
+    public func requestDevice() async throws -> JSBluetoothDevice {
         let options = RequestDeviceOptions(
             filters: nil,
             optionalServices: nil,
@@ -84,7 +84,7 @@ public final class JSBluetooth {
     /// - Returns: A Promise to a `BluetoothDevice` object.
     internal func requestDevice(
         options: RequestDeviceOptions
-    ) async throws -> JSBluetoothDevice? {
+    ) async throws -> JSBluetoothDevice {
         
         // Bluetooth.requestDevice([options])
         // .then(function(bluetoothDevice) { ... })
@@ -98,7 +98,7 @@ public final class JSBluetooth {
         let result = function.callAsFunction(this: jsObject, arguments: [optionsArg])
         guard let promise = result.object.flatMap({ JSPromise($0) })
             else { fatalError("Invalid object \(result)") }
-        return try await promise.get().object.flatMap({ JSBluetoothDevice($0) })
+        return try await promise.get().object.flatMap({ JSBluetoothDevice($0) })!
     }
 }
 
