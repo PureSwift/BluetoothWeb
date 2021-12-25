@@ -81,8 +81,9 @@ final class Store: ObservableObject {
     func scan() async throws -> Peripheral {
         // TODO: Scan for all known services
         let serviceUUIDs: Set<BluetoothUUID> = [
-            .bit16(0x180A),     // Device Information (`0x180A`)
-            //.bit16(0x180F)      // Battery Service (`0x180F`)
+            .deviceInformation,
+            .batteryService,
+            .currentTimeService,
         ]
         //scanResults.removeAll(keepingCapacity: true)
         let scanData = try await central.scan(with: serviceUUIDs)
@@ -104,8 +105,9 @@ final class Store: ObservableObject {
     func discoverServices(for peripheral: Central.Peripheral) async throws {
         // TODO: Scan for all known services
         let serviceUUIDs: Set<BluetoothUUID> = [
-            .bit16(0x180A),     // Device Information (`0x180A`)
-            //.bit16(0x180F)      // Battery Service (`0x180F`)
+            .deviceInformation,
+            .batteryService,
+            .currentTimeService,
         ]
         activity[peripheral] = true
         defer { activity[peripheral] = false }
@@ -117,8 +119,13 @@ final class Store: ObservableObject {
     func discoverCharacteristics(for service: Service) async throws {
         // TODO: Scan for all known characteristics
         let characteristicUUIDs: Set<BluetoothUUID> = [
-            //.bit16(0x2A19),     // Battery Level (`0x2A19`)
-            .bit16(0x2A24)      // Model Number String (`0x2A24`)
+            .batteryLevel,
+            .modelNumberString,
+            .manufacturerNameString,
+            .hardwareRevisionString,
+            .softwareRevisionString,
+            .firmwareRevisionString,
+            .currentTime
         ]
         activity[service.peripheral] = true
         defer { activity[service.peripheral] = false }

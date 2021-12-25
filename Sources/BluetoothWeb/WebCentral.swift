@@ -25,7 +25,7 @@ public final class WebCentral { //: CentralManager {
     internal let bluetooth: JSBluetooth
     
     private var cache = Cache()
-    
+        
     // MARK: - Initialization
     
     internal init(_ bluetooth: JSBluetooth) {
@@ -91,27 +91,25 @@ public final class WebCentral { //: CentralManager {
         guard let device = self.cache.devices[peripheral] else {
             throw CentralError.unknownPeripheral
         }
+        guard device.remoteServer.isConnected else {
+            throw CentralError.disconnected
+        }
         // discover
-        var serviceObjects = [JSBluetoothRemoteGATTService]()
-        serviceObjects.reserveCapacity(serviceUUIDs.count)
+        var services = [Service<Peripheral, AttributeID>: JSBluetoothRemoteGATTService]()
+        services.reserveCapacity(serviceUUIDs.count)
         for uuid in serviceUUIDs {
             let serviceObject = try await device.remoteServer.primaryService(for: uuid)
-            serviceObjects.append(serviceObject)
-        }
-        let services = serviceObjects.map { serviceObject in
-            Service(
-                id: serviceObject.uuid,
+            let service = Service(
+                id: newAttributeID(for: peripheral),
                 uuid: serviceObject.uuid,
                 peripheral: peripheral,
                 isPrimary: serviceObject.isPrimary
             )
-        }
-        // cache
-        for (index, service) in services.enumerated() {
-            let serviceObject = serviceObjects[index]
+            services[service] = serviceObject
+            // cache
             self.cache.services[service] = serviceObject
         }
-        return services
+        return services.keys.sorted(by: { $0.id < $1.id })
     }
     
     /// Discover Characteristics for service
@@ -123,41 +121,64 @@ public final class WebCentral { //: CentralManager {
             print("UUIDs are required for characteristic discovery")
             return []
         }
-        guard let _ = self.cache.devices[service.peripheral] else {
+        guard let device = self.cache.devices[service.peripheral] else {
             throw CentralError.unknownPeripheral
+        }
+        guard device.remoteServer.isConnected else {
+            throw CentralError.disconnected
         }
         guard let serviceObject = self.cache.services[service] else {
             throw CentralError.invalidAttribute(service.uuid)
         }
         // discover
-        var characteristicObjects = [JSBluetoothRemoteGATTCharacteristic]()
-        characteristicObjects.reserveCapacity(characteristicUUIDs.count)
+        var characteristics = [Characteristic<Peripheral, AttributeID>: JSBluetoothRemoteGATTCharacteristic]()
+        characteristics.reserveCapacity(characteristicUUIDs.count)
         for uuid in characteristicUUIDs {
-            let characteristicObject = try await serviceObject.characteristic(for: uuid)
-            characteristicObjects.append(characteristicObject)
+            do {
+                let characteristicObject = try await serviceObject.characteristic(for: uuid)
+                let characteristic = Characteristic(
+                    id: newAttributeID(for: service.peripheral),
+                    uuid: characteristicObject.uuid,
+                    peripheral: service.peripheral,
+                    properties: characteristicObject.properties.bitmask
+                )
+                characteristics[characteristic] = characteristicObject
+                self.cache.characteristics[characteristic] = characteristicObject
+            }
+            catch let error as JSError {
+                print(#function, #line)
+                dump(error)
+                if error.name == "NotFoundError" {
+                    continue
+                }
+                throw error
+            }
+            catch let error as JSValue {
+                print(#function, #line)
+                dump(error)
+                if error.NotFoundError != nil {
+                    continue
+                }
+                throw error
+            }
+            catch {
+                print(#function, #line)
+                dump(error)
+                throw error
+            }
         }
-        let characteristics = characteristicObjects.map { characteristicObject in
-            Characteristic(
-                id: characteristicObject.uuid,
-                uuid: characteristicObject.uuid,
-                peripheral: service.peripheral,
-                properties: characteristicObject.properties.bitmask
-            )
-        }
-        // cache
-        for (index, characteristic) in characteristics.enumerated() {
-            let characteristicObject = characteristicObjects[index]
-            self.cache.characteristics[characteristic] = characteristicObject
-        }
-        return characteristics
+        return characteristics.keys.sorted(by: { $0.id < $1.id })
     }
     
     /// Read Characteristic Value
     public func readValue(
         for characteristic: Characteristic<Peripheral, AttributeID>
     ) async throws -> Data {
-        guard let _ = self.cache.devices[characteristic.peripheral] else {
+        guard let device = self.cache.devices[characteristic.peripheral] else {
             throw CentralError.unknownPeripheral
+        }
+        guard device.remoteServer.isConnected else {
+            throw CentralError.disconnected
         }
         guard let characteristicObject = self.cache.characteristics[characteristic] else {
             throw CentralError.invalidAttribute(characteristic.uuid)
@@ -213,6 +234,12 @@ public final class WebCentral { //: CentralManager {
     public func maximumTransmissionUnit(for peripheral: Peripheral) async throws -> MaximumTransmissionUnit {
         return .default
     }
+    
+    // MARK: - Private Methods
+    
+    private func newAttributeID(for peripheral: Peripheral) -> AttributeID {
+        return self.cache.attributeIDs[peripheral, default: Counter()].increment()
+    }
 }
 
 // MARK: - Supporting Types
@@ -224,7 +251,7 @@ public extension WebCentral {
         public let id: String
     }
     
-    typealias AttributeID = BluetoothUUID
+    typealias AttributeID = UInt64
     
     struct Advertisement: AdvertisementData {
         
@@ -254,6 +281,8 @@ internal extension WebCentral {
     struct Cache {
         
         var devices = [Peripheral: JSBluetoothDevice]()
+        
+        var attributeIDs = [Peripheral: Counter]()
         
         var services = [Service<Peripheral, AttributeID>: JSBluetoothRemoteGATTService]()
         
@@ -309,5 +338,21 @@ extension BluetoothUUID: ConstructibleFromJSValue {
         } else {
             self.init(rawValue: string)
         }
+    }
+}
+
+struct Counter: Equatable, Hashable, RawRepresentable {
+    var rawValue: UInt64
+    init(rawValue: UInt64 = 0) {
+        self.rawValue = rawValue
+    }
+    mutating func increment() -> RawValue {
+        let oldValue = rawValue
+        if oldValue == .max {
+            rawValue = 0
+        } else {
+            rawValue += 1
+        }
+        return oldValue
     }
 }
