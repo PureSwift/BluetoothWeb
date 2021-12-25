@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import JavaScriptKit
 // import Bluetooth
 
 /// [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
@@ -39,8 +40,10 @@ public final class WebCentral { //: CentralManager {
         }
     }
     
-    public func scan() async throws -> ScanData<Peripheral, Advertisement> {
-        let device = try await bluetooth.requestDevice()
+    public func scan(
+        with services: Set<BluetoothUUID>
+    ) async throws -> ScanData<Peripheral, Advertisement> {
+        let device = try await bluetooth.requestDevice(services: Array(services))
         let peripheral = Peripheral(id: device.id)
         self.cache = Cache()
         self.cache.devices[peripheral] = device
@@ -92,13 +95,13 @@ public final class WebCentral { //: CentralManager {
         var serviceObjects = [JSBluetoothRemoteGATTService]()
         serviceObjects.reserveCapacity(serviceUUIDs.count)
         for uuid in serviceUUIDs {
-            let serviceObject = try await device.remoteServer.primaryService(for: uuid.rawValue)
+            let serviceObject = try await device.remoteServer.primaryService(for: uuid)
             serviceObjects.append(serviceObject)
         }
         let services = serviceObjects.map { serviceObject in
             Service(
-                id: BluetoothUUID(rawValue: serviceObject.uuid)!,
-                uuid: BluetoothUUID(rawValue: serviceObject.uuid)!,
+                id: serviceObject.uuid,
+                uuid: serviceObject.uuid,
                 peripheral: peripheral,
                 isPrimary: serviceObject.isPrimary
             )
@@ -130,13 +133,13 @@ public final class WebCentral { //: CentralManager {
         var characteristicObjects = [JSBluetoothRemoteGATTCharacteristic]()
         characteristicObjects.reserveCapacity(characteristicUUIDs.count)
         for uuid in characteristicUUIDs {
-            let characteristicObject = try await serviceObject.characteristic(for: uuid.rawValue)
+            let characteristicObject = try await serviceObject.characteristic(for: uuid)
             characteristicObjects.append(characteristicObject)
         }
         let characteristics = characteristicObjects.map { characteristicObject in
             Characteristic(
-                id: BluetoothUUID(rawValue: characteristicObject.uuid)!,
-                uuid: BluetoothUUID(rawValue: characteristicObject.uuid)!,
+                id: characteristicObject.uuid,
+                uuid: characteristicObject.uuid,
                 peripheral: service.peripheral, // TODO:
                 properties: [] //characteristicObject.properties
             )
@@ -248,5 +251,38 @@ internal extension WebCentral {
         var services = [Service<Peripheral, AttributeID>: JSBluetoothRemoteGATTService]()
         
         var characteristics = [Characteristic<Peripheral, AttributeID>: JSBluetoothRemoteGATTCharacteristic]()
+    }
+}
+
+extension BluetoothUUID: ConvertibleToJSValue {
+    
+    /*
+     Bluetooth Web API
+     
+     It must be a valid UUID alias (e.g. 0x1234), UUID (lowercase hex characters e.g. '00001234-0000-1000-8000-00805f9b34fb'), or recognized standard name from https://www.bluetooth.com/specifications/gatt/services e.g. 'alert_notification'.
+     */
+    public func jsValue() -> JSValue {
+        switch self {
+        case let .bit16(value):
+            return .number(Double(value))
+        case let .bit32(value):
+            return .number(Double(value))
+        case let .bit128(value):
+            return .string(UUID(value).uuidString.lowercased())
+        }
+    }
+}
+
+extension BluetoothUUID: ConstructibleFromJSValue {
+    
+    public static func construct(from value: JSValue) -> BluetoothUUID? {
+        switch value {
+        case let .string(string):
+            return BluetoothUUID(rawValue: string.description.uppercased())
+        case let .number(number):
+            return .bit16(UInt16(number))
+        default:
+            return nil
+        }
     }
 }
