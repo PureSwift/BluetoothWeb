@@ -10,7 +10,7 @@ import JavaScriptKit
 // import Bluetooth
 
 /// [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
-public final class WebCentral { //: CentralManager {
+public final class WebCentral: CentralManager {
     
     public static let shared: WebCentral? = {
         guard let jsBluetooth = JSBluetooth.shared else {
@@ -97,7 +97,7 @@ public final class WebCentral { //: CentralManager {
         // discover
         var services = [Service<Peripheral, AttributeID>: JSBluetoothRemoteGATTService]()
         services.reserveCapacity(serviceUUIDs.count)
-        for uuid in serviceUUIDs {
+        for uuid in serviceUUIDs.lazy.sorted(by: { $0.rawValue < $1.rawValue }) {
             do {
                 let serviceObject = try await device.remoteServer.primaryService(for: uuid)
                 let service = Service(
@@ -150,7 +150,7 @@ public final class WebCentral { //: CentralManager {
         // discover
         var characteristics = [Characteristic<Peripheral, AttributeID>: JSBluetoothRemoteGATTCharacteristic]()
         characteristics.reserveCapacity(characteristicUUIDs.count)
-        for uuid in characteristicUUIDs {
+        for uuid in characteristicUUIDs.lazy.sorted(by: { $0.rawValue < $1.rawValue }) {
             do {
                 let characteristicObject = try await serviceObject.characteristic(for: uuid)
                 let characteristic = Characteristic(
@@ -252,6 +252,24 @@ public final class WebCentral { //: CentralManager {
         return self.cache.attributeIDs[peripheral, default: Counter()].increment()
     }
 }
+
+#if canImport(Darwin)
+@available(*, deprecated, message: "Should not run on macOS")
+public extension WebCentral {
+    
+    func scan(with services: Set<BluetoothUUID>, filterDuplicates: Bool) -> AsyncThrowingStream<ScanData<Peripheral, Advertisement>, Error> {
+        fatalError("Should not run on macOS")
+    }
+    
+    func stopScan() async {
+        fatalError("Should not run on macOS")
+    }
+    
+    func rssi(for peripheral: Peripheral) async throws -> RSSI {
+        fatalError("Should not run on macOS")
+    }
+}
+#endif
 
 // MARK: - Supporting Types
 
