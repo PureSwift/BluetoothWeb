@@ -25,6 +25,10 @@ public final class JSDataView: JSBridgedClass {
         self.jsObject = jsObject
     }
     
+    public init(_ arrayBuffer: JSArrayBuffer) {
+        self.jsObject = Self.constructor.new(arrayBuffer)
+    }
+    
     // MARK: - Accessors
     
     /// The `byteLength` accessor property represents the length (in bytes) of the data view.
@@ -51,6 +55,17 @@ public final class JSDataView: JSBridgedClass {
         let result = function.callAsFunction(this: jsObject, byteOffset)
         return result.number.flatMap({ UInt8($0) }) ?? 0
     }
+    
+    
+    /// Stores an unsigned 8-bit integer (byte) value at the specified byte offset from the start of the `DataView`.
+    ///
+    /// - Parameter byteOffset: The offset, in byte, from the start of the view where to store the data.
+    /// - Parameter value: The value to set.
+    public func setUint8(_ byteOffset: Int, _ value: UInt8) {
+        guard let function = jsObject.setUint8.function
+            else { fatalError("Missing function \(#function)") }
+        let _ = function.callAsFunction(this: jsObject, byteOffset, value)
+    }
 }
 
 // MARK: - Sequence
@@ -64,10 +79,11 @@ extension JSDataView: Sequence {
 
 // MARK: - Collection
 
-extension JSDataView: Collection {
+extension JSDataView: MutableCollection {
     
     public subscript(index: Int) -> UInt8 {
-        return getUint8(index)
+        get { getUint8(index) }
+        set { setUint8(index, newValue) }
     }
     
     public var count: Int {
@@ -93,5 +109,19 @@ extension JSDataView: RandomAccessCollection {
     
     public subscript(bounds: Range<Int>) -> Slice<JSDataView> {
         return Slice<JSDataView>(base: self, bounds: bounds)
+    }
+}
+
+// MARK: - Data
+
+public extension JSDataView {
+    
+    /// Allocates a DataView from data.
+    convenience init(_ data: Data) {
+        let arrayBuffer = JSArrayBuffer(count: data.count)
+        self.init(arrayBuffer)
+        for (index, byte) in data.enumerated() {
+            self[index] = byte
+        }
     }
 }
