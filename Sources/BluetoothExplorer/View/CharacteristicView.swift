@@ -180,12 +180,11 @@ extension CharacteristicView {
     
     func showError(_ error: Error) {
         print(error)
-        self.error = error
         disconnect()
+        self.error = error
     }
     
     func disconnect() {
-        self.error = nil
         store.disconnect(peripheral)
     }
 }

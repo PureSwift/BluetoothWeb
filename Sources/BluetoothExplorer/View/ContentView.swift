@@ -45,7 +45,7 @@ struct ContentView: View {
                             scanButton
                             // error
                             if let error = self.error {
-                                Text("⚠️ \(error.localizedDescription)")
+                                errorView
                             }
                             // peripheral view
                             PeripheralView(peripheral: peripheral, error: $error)
@@ -73,11 +73,19 @@ extension ContentView {
         })
     }
     
+    var errorView: some View {
+        guard let error = self.error else {
+            return AnyView(EmptyView())
+        }
+        return AnyView(Text("⚠️ \(error.localizedDescription)"))
+    }
+    
     func checkSupportedBrowser() async {
         isSupported = await WebCentral.shared?.isAvailable ?? false
     }
     
     func scan() async {
+        error = nil
         isScanning = true
         do {
             // select device
