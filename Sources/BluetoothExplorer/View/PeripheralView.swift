@@ -220,22 +220,31 @@ extension PeripheralView {
     func connect() async {
         self.error = nil
         do {
+            // connect
             try await store.connect(to: peripheral)
+            // discover attributes
             try await store.discoverServices(for: peripheral)
             let services = store.services[peripheral] ?? []
             for service in services {
                 try await store.discoverCharacteristics(for: service)
+                // try to read all characteristics
+                let characteristics = store.characteristics[service] ?? []
+                let readableCharacteristics = characteristics.filter { $0.properties.contains(.read) }
+                for characteristic in readableCharacteristics {
+                    do { try await store.readValue(for: characteristic) }
+                    catch { print("Unable to read \(characteristic.uuid). \(error)") }
+                }
             }
         }
         catch {
-            self.error = error
+            showError(error)
         }
     }
     
     func showError(_ error: Error) {
-        dump(error)
+        print(error)
         self.error = error
-        store.disconnect(peripheral)
+        disconnect()
     }
     
     func disconnect() {

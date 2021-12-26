@@ -135,7 +135,7 @@ extension CharacteristicView {
     }
     
     func reload() async {
-        await loadDescriptors()
+        self.error = nil
         // read value if possible
         if values.isEmpty {
             if canPerform(.read) {
@@ -144,28 +144,19 @@ extension CharacteristicView {
         }
     }
     
-    func loadDescriptors() async {
-        // read descriptors
-        do {
-            if isConnected == false {
-                try await store.connect(to: peripheral)
-            }
-            try await store.discoverDescriptors(for: characteristic)
-        }
-        catch { self.error = error }
-    }
-    
     func read() async {
+        self.error = nil
         do {
             if isConnected == false {
                 try await store.connect(to: peripheral)
             }
             try await store.readValue(for: characteristic)
         }
-        catch { self.error = error }
+        catch { showError(error) }
     }
     
     func notify() async {
+        self.error = nil
         let isEnabled = !isNotifying
         do {
             if isConnected == false {
@@ -173,16 +164,28 @@ extension CharacteristicView {
             }
             try await store.notify(isEnabled, for: characteristic)
         }
-        catch { self.error = error }
+        catch { showError(error) }
     }
     
     func write(_ data: Data) async {
+        self.error = nil
         do {
             if isConnected == false {
                 try await store.connect(to: peripheral)
             }
             try await store.writeValue(data, for: characteristic, withResponse: willWriteWithResponse)
         }
-        catch { self.error = error }
+        catch { showError(error) }
+    }
+    
+    func showError(_ error: Error) {
+        print(error)
+        self.error = error
+        disconnect()
+    }
+    
+    func disconnect() {
+        self.error = nil
+        store.disconnect(peripheral)
     }
 }

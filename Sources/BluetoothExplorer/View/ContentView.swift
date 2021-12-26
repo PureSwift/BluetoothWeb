@@ -84,15 +84,15 @@ extension ContentView {
             let peripheral = try await store.scan()
             // show device UI
             self.device = peripheral
-            print("Selected \(peripheral)")
+            print("Selected peripheral \(peripheral)")
             // is scanning
             isScanning = false
             // connect and load services
             try await connect(peripheral)
         }
         catch {
-            self.error = error
             isScanning = false
+            showError(error)
         }
     }
     
@@ -102,6 +102,18 @@ extension ContentView {
         let services = store.services[peripheral] ?? []
         for service in services {
             try await store.discoverCharacteristics(for: service)
+            // try to read all characteristics
+            let characteristics = store.characteristics[service] ?? []
+            let readableCharacteristics = characteristics.filter { $0.properties.contains(.read) }
+            for characteristic in readableCharacteristics {
+                do { try await store.readValue(for: characteristic) }
+                catch { print("Unable to read \(characteristic.uuid). \(error)") }
+            }
         }
+    }
+    
+    private func showError(_ error: Error) {
+        print(error)
+        self.error = error
     }
 }

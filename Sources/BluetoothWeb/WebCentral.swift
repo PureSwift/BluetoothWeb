@@ -204,7 +204,21 @@ public final class WebCentral: CentralManager {
         for characteristic: Characteristic<Peripheral, AttributeID>,
         withResponse: Bool
     ) async throws {
-        
+        guard let device = self.cache.devices[characteristic.peripheral] else {
+            throw CentralError.unknownPeripheral
+        }
+        guard device.remoteServer.isConnected else {
+            throw CentralError.disconnected
+        }
+        guard let characteristicObject = self.cache.characteristics[characteristic] else {
+            throw CentralError.invalidAttribute(characteristic.uuid)
+        }
+        let dataView = JSDataView(data)
+        if withResponse {
+            try await characteristicObject.writeValueWithResponse(dataView)
+        } else {
+            try await characteristicObject.writeValueWithoutResponse(dataView)
+        }
     }
     
     /// Discover descriptors
