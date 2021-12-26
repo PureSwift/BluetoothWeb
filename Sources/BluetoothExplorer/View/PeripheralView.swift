@@ -20,8 +20,8 @@ struct PeripheralView: View {
     @State
     var selection: Store.Characteristic?
     
-    @State
-    var error: String?
+    @Binding
+    var error: Error?
     
     var body: some View {
         VStack(alignment: .center, spacing: nil) {
@@ -59,7 +59,7 @@ extension PeripheralView {
         VStack(alignment: .center, spacing: nil) {
             // Detail view
             if let characteristic = self.selection {
-                CharacteristicView(characteristic: characteristic)
+                CharacteristicView(characteristic: characteristic, error: $error)
             } else {
                 EmptyView()
             }
@@ -180,10 +180,6 @@ extension PeripheralView {
                 }
             }
             .buttonStyle(BorderlessButtonStyle())
-            // error
-            if let error = self.error {
-                Text("⚠️ \(error)")
-            }
         }
     }
     
@@ -226,19 +222,19 @@ extension PeripheralView {
         do {
             try await store.connect(to: peripheral)
             try await store.discoverServices(for: peripheral)
-            let peripherals = store.services[peripheral] ?? []
-            for service in peripherals {
+            let services = store.services[peripheral] ?? []
+            for service in services {
                 try await store.discoverCharacteristics(for: service)
             }
         }
         catch {
-            showError(error)
+            self.error = error
         }
     }
     
     func showError(_ error: Error) {
         dump(error)
-        self.error = error.localizedDescription
+        self.error = error
         store.disconnect(peripheral)
     }
     

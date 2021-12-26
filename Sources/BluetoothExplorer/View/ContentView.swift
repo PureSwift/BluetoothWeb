@@ -24,6 +24,9 @@ struct ContentView: View {
     @State
     var isSupported: Bool?
     
+    @State
+    var error: Error?
+    
     var body: some View {
         switch isSupported {
         case .none:
@@ -38,11 +41,16 @@ struct ContentView: View {
                 AnyView(
                     ScrollView {
                         VStack(alignment: .center, spacing: nil) {
-                            VStack(alignment: .center, spacing: nil) {
-                                scanButton
+                            // scan
+                            scanButton
+                            // error
+                            if let error = self.error {
+                                Text("⚠️ \(error.localizedDescription)")
                             }
-                            PeripheralView(peripheral: peripheral)
+                            // peripheral view
+                            PeripheralView(peripheral: peripheral, error: $error)
                         }
+                        .padding()
                     }
                 )
             } else {
@@ -63,7 +71,6 @@ extension ContentView {
             Text("Scan")
                 .padding()
         })
-        .padding()
     }
     
     func checkSupportedBrowser() async {
@@ -71,13 +78,30 @@ extension ContentView {
     }
     
     func scan() async {
+        isScanning = true
         do {
             // select device
             let peripheral = try await store.scan()
             // show device UI
             self.device = peripheral
             print("Selected \(peripheral)")
+            // is scanning
+            isScanning = false
+            // connect and load services
+            try await connect(peripheral)
         }
-        catch { print(error) }
+        catch {
+            self.error = error
+            isScanning = false
+        }
+    }
+    
+    func connect(_ peripheral: Store.Peripheral) async throws {
+        try await store.connect(to: peripheral)
+        try await store.discoverServices(for: peripheral)
+        let services = store.services[peripheral] ?? []
+        for service in services {
+            try await store.discoverCharacteristics(for: service)
+        }
     }
 }

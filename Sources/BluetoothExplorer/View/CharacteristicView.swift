@@ -23,6 +23,9 @@ struct CharacteristicView: View {
     @State
     var willWriteWithResponse = true
     
+    @Binding
+    var error: Error?
+    
     var body: some View {
         VStack {
             if actions.isEmpty == false {
@@ -55,25 +58,10 @@ struct CharacteristicView: View {
                     values: values
                 )
             }
-            /*
-            if descriptors.isEmpty == false {
-                Section(content: {
-                    ForEach(descriptors) { descriptor in
-                        NavigationLink(destination: {
-                            //DescriptorView(store: store, descriptor: descriptor)
-                            Text(verbatim: $0.descriptor)
-                        }, label: {
-                            AttributeCell(uuid: descriptor.uuid)
-                        })
-                    }
-                }, header: {
-                    Text("Descriptors")
-                })
-            }*/
         }
         .navigationTitle(title)
         .task {
-            if values.isEmpty || descriptors.isEmpty  {
+            if values.isEmpty  {
                 await reload()
             }
         }
@@ -164,7 +152,7 @@ extension CharacteristicView {
             }
             try await store.discoverDescriptors(for: characteristic)
         }
-        catch { print("Unable to load descriptors", error) }
+        catch { self.error = error }
     }
     
     func read() async {
@@ -174,7 +162,7 @@ extension CharacteristicView {
             }
             try await store.readValue(for: characteristic)
         }
-        catch { print("Unable to read value", error) }
+        catch { self.error = error }
     }
     
     func notify() async {
@@ -185,7 +173,7 @@ extension CharacteristicView {
             }
             try await store.notify(isEnabled, for: characteristic)
         }
-        catch { print("Unable to \(isEnabled ? "enable" : "disable") value", error) }
+        catch { self.error = error }
     }
     
     func write(_ data: Data) async {
@@ -195,6 +183,6 @@ extension CharacteristicView {
             }
             try await store.writeValue(data, for: characteristic, withResponse: willWriteWithResponse)
         }
-        catch { print("Unable to write value", error) }
+        catch { self.error = error }
     }
 }
