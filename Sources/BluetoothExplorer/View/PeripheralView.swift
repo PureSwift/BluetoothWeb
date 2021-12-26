@@ -24,7 +24,26 @@ struct PeripheralView: View {
     var error: String?
     
     var body: some View {
-        VStack(alignment: .center, spacing: 5) {
+        VStack(alignment: .center, spacing: nil) {
+            // sidebar
+            VStack(alignment: .leading, spacing: nil) {
+                sidebar
+                    .padding()
+                Spacer()
+            }
+            // detail
+            VStack(alignment: .center, spacing: nil) {
+                contentView.padding()
+                Spacer()
+            }
+        }
+    }
+}
+
+extension PeripheralView {
+    
+    var sidebar: some View {
+        VStack(alignment: .leading, spacing: nil) {
             // name
             if let name = scanData?.advertisementData.localName {
                 Text(verbatim: name)
@@ -32,38 +51,47 @@ struct PeripheralView: View {
             // Detail view
             statusView
             // GATT
-            VStack(alignment: .leading, spacing: 5) {
-                OutlineGroup(groups, children: \.children) { group in
-                    switch group {
-                    case let .service(serviceGroup):
-                        VStack(alignment: .leading, spacing: 5) {
-                            AnyView(
-                                Text(verbatim: serviceGroup.service.uuid.description)
-                            )
-                        }
-                    case let .characteristic(characteristicGroup):
-                        VStack(alignment: .leading, spacing: 5) {
-                            AnyView(
-                                Button(action: {
-                                    select(characteristicGroup.characteristic)
-                                }, label: {
-                                    Text(verbatim: characteristicGroup.characteristic.uuid.description)
-                                })
-                            )
-                        }
-                    }
-                }
-            }
-            .buttonStyle(BorderlessButtonStyle())
+            outlineGroup
+        }
+    }
+    
+    var contentView: some View {
+        VStack(alignment: .center, spacing: nil) {
             // Detail view
             if let characteristic = self.selection {
                 CharacteristicView(characteristic: characteristic)
+            } else {
+                EmptyView()
             }
-        }.padding()
+        }
     }
-}
-
-extension PeripheralView {
+    
+    var outlineGroup: some View {
+        OutlineGroup(groups, children: \.children) { group in
+            switch group {
+            case let .service(serviceGroup):
+                let uuid = serviceGroup.service.uuid
+                VStack(alignment: .leading, spacing: nil) {
+                    AnyView(
+                        Text(verbatim: uuid.name ?? uuid.rawValue)
+                    )
+                }
+            case let .characteristic(characteristicGroup):
+                let uuid = characteristicGroup.characteristic.uuid
+                VStack(alignment: .leading, spacing: nil) {
+                    AnyView(
+                        Button(action: {
+                            select(characteristicGroup.characteristic)
+                        }, label: {
+                            Text(verbatim: uuid.name ?? uuid.rawValue)
+                        })
+                        .buttonStyle(BorderlessButtonStyle())
+                    )
+                    .padding()
+                }
+            }
+        }
+    }
     
     enum AttributeGroup: Equatable, Identifiable {
         

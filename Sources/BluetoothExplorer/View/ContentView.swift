@@ -37,14 +37,11 @@ struct ContentView: View {
             } else if let peripheral = device {
                 AnyView(
                     ScrollView {
-                        HStack(alignment: .center, spacing: nil) {
-                            Spacer()
+                        VStack(alignment: .center, spacing: nil) {
                             VStack(alignment: .center, spacing: nil) {
                                 scanButton
-                                PeripheralView(peripheral: peripheral)
                             }
-                            .padding()
-                            Spacer()
+                            PeripheralView(peripheral: peripheral)
                         }
                     }
                 )
