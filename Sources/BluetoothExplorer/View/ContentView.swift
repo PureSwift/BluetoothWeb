@@ -37,16 +37,12 @@ struct ContentView: View {
         case .some(true):
             if isScanning {
                 AnyView(Text("Scanning for devices..."))
-            } else if let peripheral = device {
+            } else if let peripheral = device, error == nil {
                 AnyView(
                     ScrollView {
                         VStack(alignment: .center, spacing: nil) {
                             // scan
                             scanButton
-                            // error
-                            if let error = self.error {
-                                errorView
-                            }
                             // peripheral view
                             PeripheralView(peripheral: peripheral, error: $error)
                         }
@@ -55,7 +51,13 @@ struct ContentView: View {
                 )
             } else {
                 AnyView(
-                    scanButton
+                    VStack(alignment: .center, spacing: 10) {
+                        scanButton
+                        // error
+                        if let _ = self.error {
+                            errorView
+                        }
+                    }
                 )
             }
         }
