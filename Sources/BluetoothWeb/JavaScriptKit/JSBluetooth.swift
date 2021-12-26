@@ -139,20 +139,24 @@ public extension JSBluetooth {
     }
 }
 
+// MARK: - Extensions
+
 internal extension JSPromise {
+    
     /// Wait for the promise to complete, returning (or throwing) its result.
     func get() async throws -> JSValue {
         return try await withUnsafeThrowingContinuation { [self] continuation in
-                self.then(
-                    success: {
-                        continuation.resume(returning: $0)
-                        return JSValue.undefined
-                    },
-                    failure: {
-                        continuation.resume(throwing: $0)
-                        return JSValue.undefined
-                    }
-                )
-            }
+            self.then(
+                success: {
+                    continuation.resume(returning: $0)
+                    return JSValue.undefined
+                },
+                failure: {
+                    let error: Error = $0.object.flatMap { JSError(unsafelyWrapping: $0) } ?? $0
+                    continuation.resume(throwing: error)
+                    return JSValue.undefined
+                }
+            )
+        }
     }
 }

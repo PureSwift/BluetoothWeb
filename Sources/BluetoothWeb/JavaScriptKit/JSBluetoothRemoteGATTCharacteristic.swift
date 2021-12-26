@@ -71,7 +71,7 @@ public final class JSBluetoothRemoteGATTCharacteristic: JSBridgedClass {
     public func writeValueWithResponse(_ data: JSDataView) async throws {
         guard let function = jsObject.writeValueWithResponse.function
             else { fatalError("Missing function \(#function)") }
-        let result = function.callAsFunction(this: jsObject)
+        let result = function.callAsFunction(this: jsObject, data)
         guard let promise = result.object.flatMap({ JSPromise($0) })
             else { fatalError("Invalid object \(result)") }
         let _ = try await promise.get()
@@ -83,7 +83,7 @@ public final class JSBluetoothRemoteGATTCharacteristic: JSBridgedClass {
     public func writeValueWithoutResponse(_ data: JSDataView) async throws {
         guard let function = jsObject.writeValueWithoutResponse.function
             else { fatalError("Missing function \(#function)") }
-        let result = function.callAsFunction(this: jsObject)
+        let result = function.callAsFunction(this: jsObject, data)
         guard let promise = result.object.flatMap({ JSPromise($0) })
             else { fatalError("Invalid object \(result)") }
         let _ = try await promise.get()

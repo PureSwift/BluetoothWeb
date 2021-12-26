@@ -30,13 +30,14 @@ struct ContentView: View {
     var body: some View {
         switch isSupported {
         case .none:
-            AnyView(Text("Loading..."))
+            AnyView(Text("Loading...").padding())
                 .task { await checkSupportedBrowser() }
         case .some(false):
             AnyView(UnsupportedView())
         case .some(true):
             if isScanning {
                 AnyView(Text("Scanning for devices..."))
+                    .padding()
             } else if let peripheral = device, error == nil {
                 AnyView(
                     ScrollView {
@@ -57,7 +58,7 @@ struct ContentView: View {
                         if let _ = self.error {
                             errorView
                         }
-                    }
+                    }.padding()
                 )
             }
         }

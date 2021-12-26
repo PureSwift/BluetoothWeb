@@ -38,12 +38,14 @@ struct CharacteristicView: View {
                     Button("Write") {
                         willWriteWithResponse = true
                         showSheet = true
+                        Task { await write(Data([01,02,03])) }
                     }
                 }
                 if canPerform(.writeWithoutResponse) {
                     Button("Write without response") {
                         willWriteWithResponse = false
                         showSheet = true
+                        Task { await write(Data([01,02,03])) }
                     }
                 }
                 if canPerform(.notify) {

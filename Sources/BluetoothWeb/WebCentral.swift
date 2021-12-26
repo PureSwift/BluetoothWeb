@@ -111,7 +111,7 @@ public final class WebCentral: CentralManager {
                 self.cache.services[service] = serviceObject
             }
             catch let error as JSError {
-                if error.name == "NotFoundError" {
+                if error.jsObject.NotFoundError != nil {
                     continue
                 }
                 throw error
@@ -163,7 +163,7 @@ public final class WebCentral: CentralManager {
                 self.cache.characteristics[characteristic] = characteristicObject
             }
             catch let error as JSError {
-                if error.name == "NotFoundError" {
+                if error.jsObject.NotFoundError != nil {
                     continue
                 }
                 throw error
