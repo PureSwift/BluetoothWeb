@@ -88,4 +88,52 @@ public final class JSBluetoothRemoteGATTCharacteristic: JSBridgedClass {
             else { fatalError("Invalid object \(result)") }
         let _ = try await promise.get()
     }
+    
+    /*
+     The `BluetoothRemoteGATTCharacteristic.startNotifications()` method returns a `Promise` to the `BluetoothRemoteGATTCharacteristic` instance when there is an active notification on it.
+     */
+    public func startNotifications() async throws {
+        guard let function = jsObject.startNotifications.function
+            else { fatalError("Missing function \(#function)") }
+        let result = function.callAsFunction(this: jsObject)
+        guard let promise = result.object.flatMap({ JSPromise($0) })
+            else { fatalError("Invalid object \(result)") }
+        let _ = try await promise.get()
+    }
+    
+    /*
+     The `BluetoothRemoteGATTCharacteristic.stopNotifications()` method returns a `Promise` to the `BluetoothRemoteGATTCharacteristic` instance when there is no longer an active notification on it.
+     */
+    public func stopNotifications() async throws {
+        guard let function = jsObject.stopNotifications.function
+            else { fatalError("Missing function \(#function)") }
+        let result = function.callAsFunction(this: jsObject)
+        guard let promise = result.object.flatMap({ JSPromise($0) })
+            else { fatalError("Invalid object \(result)") }
+        let _ = try await promise.get()
+    }
+    
+    /*
+     
+     */
+    public func addEventListener(
+        _ string: String,
+        _ closure: JSClosure
+    ) {
+        guard let function = jsObject.addEventListener.function
+            else { fatalError("Missing function \(#function)") }
+        let _ = function.callAsFunction(this: jsObject, string, closure)
+    }
+    
+    /*
+     
+     */
+    public func removeEventListener(
+        _ string: String,
+        _ closure: JSClosure
+    ) {
+        guard let function = jsObject.removeEventListener.function
+            else { fatalError("Missing function \(#function)") }
+        let _ = function.callAsFunction(this: jsObject, string, closure)
+    }
 }

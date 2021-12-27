@@ -25,6 +25,8 @@ public final class WebCentral: CentralManager {
     internal let bluetooth: JSBluetooth
     
     private var cache = Cache()
+    
+    private var continuation = Continuation()
         
     // MARK: - Initialization
     
@@ -247,12 +249,55 @@ public final class WebCentral: CentralManager {
     public func notify(
         for characteristic: Characteristic<Peripheral, AttributeID>
     ) async throws -> AsyncThrowingStream<Data, Error> {
-        fatalError()
+        guard let device = self.cache.devices[characteristic.peripheral] else {
+            throw CentralError.unknownPeripheral
+        }
+        guard device.remoteServer.isConnected else {
+            throw CentralError.disconnected
+        }
+        guard let characteristicObject = self.cache.characteristics[characteristic] else {
+            throw CentralError.invalidAttribute(characteristic.uuid)
+        }
+        let closure = JSClosure { values in
+            self.recievedNotification(characteristic, values)
+            return .undefined
+        }
+        try await characteristicObject.startNotifications()
+        return AsyncThrowingStream<Data, Error> { [unowned self] continuation in
+            self.continuation.notifications[characteristic] = (closure, continuation)
+            characteristicObject.addEventListener(
+                "characteristicvaluechanged",
+                closure
+            )
+        }
     }
     
     // Stop Notifications
     public func stopNotifications(for characteristic: Characteristic<Peripheral, AttributeID>) async throws {
-        
+        guard let device = self.cache.devices[characteristic.peripheral] else {
+            throw CentralError.unknownPeripheral
+        }
+        guard device.remoteServer.isConnected else {
+            throw CentralError.disconnected
+        }
+        guard let characteristicObject = self.cache.characteristics[characteristic] else {
+            throw CentralError.invalidAttribute(characteristic.uuid)
+        }
+        guard let (closure, continuation) = self.continuation.notifications[characteristic] else {
+            assertionFailure("Missing notification continuation for \(characteristic.uuid)")
+            return
+        }
+        characteristicObject.removeEventListener(
+            "characteristicvaluechanged",
+            closure
+        )
+        // stop registering for notification
+        do { try await characteristicObject.stopNotifications() }
+        catch {
+            continuation.finish(throwing: error)
+            throw error
+        }
+        continuation.finish(throwing: nil)
     }
     
     /// Read MTU
@@ -264,6 +309,23 @@ public final class WebCentral: CentralManager {
     
     private func newAttributeID(for peripheral: Peripheral) -> AttributeID {
         return self.cache.attributeIDs[peripheral, default: Counter()].increment()
+    }
+    
+    private func recievedNotification(
+        _ characteristic: Characteristic<Peripheral, AttributeID>,
+        _ values: [JSValue]
+    ) {
+        print(#function, characteristic.uuid, values)
+        guard let (_, continuation) = self.continuation.notifications[characteristic] else {
+            assertionFailure("Missing notification continuation for \(characteristic.uuid)")
+            return
+        }
+        guard let dataView = values.first?.target.value.object.flatMap({ JSDataView(unsafelyWrapping: $0) }) else {
+            assertionFailure("Missing notification continuation for \(characteristic.uuid)")
+            return
+        }
+        let data = Data(dataView)
+        continuation.yield(data)
     }
 }
 
@@ -330,6 +392,11 @@ internal extension WebCentral {
         var services = [Service<Peripheral, AttributeID>: JSBluetoothRemoteGATTService]()
         
         var characteristics = [Characteristic<Peripheral, AttributeID>: JSBluetoothRemoteGATTCharacteristic]()
+    }
+    
+    struct Continuation {
+        
+        var notifications = [Characteristic<Peripheral, AttributeID> : (JSClosure, AsyncThrowingStream<Data, Error>.Continuation)]()
     }
 }
 
