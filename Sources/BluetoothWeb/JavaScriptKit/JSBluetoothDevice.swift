@@ -7,6 +7,7 @@
 
 
 import JavaScriptKit
+import Bluetooth
 
 /// JavaScript Bluetooth Device object.
 public final class JSBluetoothDevice: JSBridgedClass {

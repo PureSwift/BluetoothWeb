@@ -6,6 +6,7 @@
 //
 
 import JavaScriptKit
+import Bluetooth
 
 /// JavaScript Bluetooth interface
 /// 

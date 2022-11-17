@@ -7,7 +7,8 @@
 
 import Foundation
 import JavaScriptKit
-// import Bluetooth
+import Bluetooth
+import GATT
 
 /// [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
 public final class WebCentral: CentralManager {
@@ -248,7 +249,7 @@ public final class WebCentral: CentralManager {
     /// Start Notifications
     public func notify(
         for characteristic: Characteristic<Peripheral, AttributeID>
-    ) async throws -> AsyncThrowingStream<Data, Error> {
+    ) async throws -> AsyncCentralNotifications<WebCentral> {
         guard let device = self.cache.devices[characteristic.peripheral] else {
             throw CentralError.unknownPeripheral
         }
@@ -263,7 +264,7 @@ public final class WebCentral: CentralManager {
             return .undefined
         }
         try await characteristicObject.startNotifications()
-        return AsyncThrowingStream<Data, Error> { [unowned self] continuation in
+        return AsyncCentralNotifications<WebCentral> { [unowned self] continuation in
             self.continuation.notifications[characteristic] = (closure, continuation)
             characteristicObject.addEventListener(
                 "characteristicvaluechanged",
@@ -272,8 +273,18 @@ public final class WebCentral: CentralManager {
         }
     }
     
-    // Stop Notifications
-    public func stopNotifications(for characteristic: Characteristic<Peripheral, AttributeID>) async throws {
+    /// Read MTU
+    public func maximumTransmissionUnit(for peripheral: Peripheral) async throws -> MaximumTransmissionUnit {
+        return .default
+    }
+
+    func rssi(for peripheral: Peripheral) async throws -> RSSI {
+        return RSSI(rawValue: +20)!
+    }
+    
+    // MARK: - Private Methods
+
+    private func stopNotifications(for characteristic: Characteristic<Peripheral, AttributeID>) async throws {
         guard let device = self.cache.devices[characteristic.peripheral] else {
             throw CentralError.unknownPeripheral
         }
@@ -299,13 +310,6 @@ public final class WebCentral: CentralManager {
         }
         continuation.finish(throwing: nil)
     }
-    
-    /// Read MTU
-    public func maximumTransmissionUnit(for peripheral: Peripheral) async throws -> MaximumTransmissionUnit {
-        return .default
-    }
-    
-    // MARK: - Private Methods
     
     private func newAttributeID(for peripheral: Peripheral) -> AttributeID {
         return self.cache.attributeIDs[peripheral, default: Counter()].increment()
@@ -407,7 +411,7 @@ extension BluetoothUUID: ConvertibleToJSValue {
      
      It must be a valid UUID alias (e.g. 0x1234), UUID (lowercase hex characters e.g. '00001234-0000-1000-8000-00805f9b34fb'), or recognized standard name from https://www.bluetooth.com/specifications/gatt/services e.g. 'alert_notification'.
      */
-    public func jsValue() -> JSValue {
+    public var jsValue: JSValue {
         switch self {
         case let .bit16(value):
             return .number(Double(value))
@@ -438,7 +442,7 @@ extension BluetoothUUID: ConstructibleFromJSValue {
         let prefix = "0000"
         if string.count == UUID.stringLength,
            string.hasSuffix(suffix),
-            string.hasPrefix(prefix) {
+           string.hasPrefix(prefix) {
             string.removeFirst(prefix.count)
             string.removeLast(suffix.count)
             guard string.count == 4, let number = UInt16(hexadecimal: string) else {
@@ -452,7 +456,9 @@ extension BluetoothUUID: ConstructibleFromJSValue {
 }
 
 struct Counter: Equatable, Hashable, RawRepresentable {
+
     var rawValue: UInt64
+
     init(rawValue: UInt64 = 0) {
         self.rawValue = rawValue
     }
