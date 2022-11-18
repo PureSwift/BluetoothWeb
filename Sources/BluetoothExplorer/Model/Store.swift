@@ -79,8 +79,7 @@ final class Store: ObservableObject {
     }
     
     func scan() async throws -> Peripheral {
-        // FIXME: 
-        let serviceUUIDs = Set<BluetoothUUID>() //BluetoothUUID.assignedNumbers
+        let serviceUUIDs = BluetoothUUID.assignedNumbers
         scanResults.removeAll(keepingCapacity: true)
         let scanData = try await central.scan(with: serviceUUIDs)
         scanResults[scanData.peripheral] = scanData
@@ -99,8 +98,7 @@ final class Store: ObservableObject {
     }
     
     func discoverServices(for peripheral: Central.Peripheral) async throws {
-        // FIXME: Discover all known services
-        let serviceUUIDs = Set<BluetoothUUID>() // BluetoothUUID.assignedNumbers
+        let serviceUUIDs = BluetoothUUID.assignedNumbers
         activity[peripheral] = true
         defer { activity[peripheral] = false }
         let services = try await central.discoverServices(serviceUUIDs, for: peripheral)
@@ -108,8 +106,7 @@ final class Store: ObservableObject {
     }
     
     func discoverCharacteristics(for service: Service) async throws {
-        // FIXME: Discover all known characteristics
-        let characteristicUUIDs = Set<BluetoothUUID>() // BluetoothUUID.assignedNumbers
+        let characteristicUUIDs = BluetoothUUID.assignedNumbers
         activity[service.peripheral] = true
         defer { activity[service.peripheral] = false }
         let characteristics = try await central.discoverCharacteristics(characteristicUUIDs, for: service)
