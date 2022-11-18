@@ -1,0 +1,7 @@
+{
+    "swift.autoGenerateLaunchConfigurations": false,
+    "swift.buildArguments": [
+        "--triple",
+        "wasm32-unknown-wasi"
+    ]
+}
