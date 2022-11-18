@@ -52,6 +52,9 @@ final class Store: ObservableObject {
     
     @Published
     private(set) var isNotifying = [Characteristic: Bool]()
+
+    @Published
+    private(set) var uuids = BluetoothUUID.assignedNumbers
     
     private var central: Central {
         guard let central = WebCentral.shared else {
@@ -79,9 +82,8 @@ final class Store: ObservableObject {
     }
     
     func scan() async throws -> Peripheral {
-        let serviceUUIDs = BluetoothUUID.assignedNumbers
         scanResults.removeAll(keepingCapacity: true)
-        let scanData = try await central.scan(with: serviceUUIDs)
+        let scanData = try await central.scan(with: uuids)
         scanResults[scanData.peripheral] = scanData
         return scanData.peripheral
     }
@@ -98,18 +100,16 @@ final class Store: ObservableObject {
     }
     
     func discoverServices(for peripheral: Central.Peripheral) async throws {
-        let serviceUUIDs = BluetoothUUID.assignedNumbers
         activity[peripheral] = true
         defer { activity[peripheral] = false }
-        let services = try await central.discoverServices(serviceUUIDs, for: peripheral)
+        let services = try await central.discoverServices(uuids, for: peripheral)
         self.services[peripheral] = services
     }
     
     func discoverCharacteristics(for service: Service) async throws {
-        let characteristicUUIDs = BluetoothUUID.assignedNumbers
         activity[service.peripheral] = true
         defer { activity[service.peripheral] = false }
-        let characteristics = try await central.discoverCharacteristics(characteristicUUIDs, for: service)
+        let characteristics = try await central.discoverCharacteristics(uuids, for: service)
         self.characteristics[service] = characteristics
     }
     
@@ -156,7 +156,8 @@ final class Store: ObservableObject {
                 }
             }
         } else {
-            try await central.stopNotifications(for: characteristic)
+            // FIXME: stop notifications
+            //try await central.stopNotifications(for: characteristic)
             isNotifying[characteristic] = false
         }
     }

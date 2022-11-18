@@ -6,6 +6,8 @@
 //
 
 import JavaScriptKit
+import Bluetooth
+import GATT
 
 /*
  The [`BluetoothCharacteristicProperties`](https://developer.mozilla.org/en-US/docs/Web/API/BluetoothCharacteristicProperties) interface of the [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API) provides the operations that are valid on the given [1BluetoothRemoteGATTCharacteristic1](https://developer.mozilla.org/en-US/docs/Web/API/BluetoothRemoteGATTCharacteristic).
@@ -14,7 +16,7 @@ import JavaScriptKit
  */
 public final class JSBluetoothCharacteristicProperties: JSBridgedClass {
     
-    public static let constructor = JSObject.global.BluetoothCharacteristicProperties.function!
+    public static let constructor = JSObject.global.BluetoothCharacteristicProperties.function
     
     // MARK: - Properties
     

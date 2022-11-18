@@ -17,7 +17,7 @@ import JavaScriptKit
  */
 public final class JSArrayBuffer: JSBridgedClass {
     
-    public static let constructor = JSObject.global.ArrayBuffer.function!
+    public static let constructor = JSObject.global.ArrayBuffer.function
     
     // MARK: - Properties
     
@@ -30,7 +30,7 @@ public final class JSArrayBuffer: JSBridgedClass {
     }
     
     public init(count: Int) {
-        self.jsObject = Self.constructor.new(count)
+        self.jsObject = Self.constructor!.new(count)
     }
     
     // MARK: - Accessors

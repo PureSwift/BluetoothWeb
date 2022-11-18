@@ -6,12 +6,13 @@
 //
 
 import JavaScriptKit
+import Bluetooth
 
 /// Represents a GATT Server on a remote device.
 // https://developer.mozilla.org/en-US/docs/Web/API/BluetoothRemoteGATTServer
 public final class JSBluetoothRemoteGATTServer: JSBridgedClass {
     
-    public static let constructor = JSObject.global.BluetoothRemoteGATTServer.function!
+    public static let constructor = JSObject.global.BluetoothRemoteGATTServer.function
     
     // MARK: - Properties
     

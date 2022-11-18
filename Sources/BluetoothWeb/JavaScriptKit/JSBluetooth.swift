@@ -6,13 +6,14 @@
 //
 
 import JavaScriptKit
+import Bluetooth
 
 /// JavaScript Bluetooth interface
 /// 
 /// - SeeAlso: [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
 public final class JSBluetooth: JSBridgedClass {
     
-    public static let constructor = JSObject.global.Bluetooth.function!
+    public static let constructor = JSObject.global.Bluetooth.function
     
     // MARK: - Properties
     
@@ -91,11 +92,11 @@ public final class JSBluetooth: JSBridgedClass {
         // Bluetooth.requestDevice([options])
         // .then(function(bluetoothDevice) { ... })
         
-        // TODO: Customize options
-        let optionsArg: [String: ConvertibleToJSValue] = [
-            "acceptAllDevices": true,
-            "optionalServices": options.optionalServices ?? [] as [ConvertibleToJSValue]
+        let optionsArg: ConvertibleToJSValue = [
+            "acceptAllDevices": true.jsValue,
+            "optionalServices": (options.optionalServices ?? []).jsValue
         ]
+        
         guard let function = jsObject.requestDevice.function
             else { fatalError("Invalid function \(#function)") }
         let result = function.callAsFunction(this: jsObject, arguments: [optionsArg])

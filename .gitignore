@@ -21,6 +21,7 @@ DerivedData/
 !default.mode2v3
 *.perspectivev3
 !default.perspectivev3
+.DS_Store
 
 ## Obj-C/Swift specific
 *.hmap
@@ -39,13 +40,9 @@ playground.xcworkspace
 # Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
 # Packages/
 # Package.pins
-# Package.resolved
-# *.xcodeproj
-#
-# Xcode automatically generates this directory with a .xcworkspacedata file and xcuserdata
-# hence it is not needed unless you have added a package configuration file to your project
-# .swiftpm
-
+Package.resolved
+*.xcodeproj
+.swiftpm
 .build/
 
 # CocoaPods
@@ -88,3 +85,6 @@ fastlane/test_output
 # https://github.com/johnno1962/injectionforxcode
 
 iOSInjectionProject/
+
+# Swift WASM
+Bundle/

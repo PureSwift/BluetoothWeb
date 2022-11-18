@@ -13,7 +13,7 @@ import JavaScriptKit
  */
 public final class JSDataView: JSBridgedClass {
     
-    public static let constructor = JSObject.global.DataView.function!
+    public static let constructor = JSObject.global.DataView.function
     
     // MARK: - Properties
     
@@ -26,7 +26,7 @@ public final class JSDataView: JSBridgedClass {
     }
     
     public init(_ arrayBuffer: JSArrayBuffer) {
-        self.jsObject = Self.constructor.new(arrayBuffer)
+        self.jsObject = Self.constructor!.new(arrayBuffer)
     }
     
     // MARK: - Accessors

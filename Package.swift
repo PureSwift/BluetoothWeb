@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.7
 import PackageDescription
 let package = Package(
     name: "BluetoothWeb",
@@ -15,9 +15,12 @@ let package = Package(
     ],
     dependencies: [
         .package(
-            name: "Tokamak",
             url: "https://github.com/TokamakUI/Tokamak",
-            from: "0.9.0"
+            from: "0.11.0"
+        ),
+        .package(
+            url: "https://github.com/PureSwift/GATT",
+            branch: "master"
         )
     ],
     targets: [
@@ -37,6 +40,10 @@ let package = Package(
                 .product(
                     name: "TokamakShim",
                     package: "Tokamak"
+                ),
+                .product(
+                    name: "GATT",
+                    package: "GATT"
                 ),
             ]
         )
