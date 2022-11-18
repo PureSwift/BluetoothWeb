@@ -13,7 +13,7 @@ import Bluetooth
 /// - SeeAlso: [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
 public final class JSBluetooth: JSBridgedClass {
     
-    public static let constructor = JSObject.global.Bluetooth.function!
+    public static let constructor = JSObject.global.Bluetooth.function
     
     // MARK: - Properties
     
@@ -95,11 +95,11 @@ public final class JSBluetooth: JSBridgedClass {
         // TODO: Customize options
         let optionsArg: [String: ConvertibleToJSValue] = [
             "acceptAllDevices": true,
-            "optionalServices": options.optionalServices ?? [] as [ConvertibleToJSValue]
+            "optionalServices": options.optionalServices ?? []
         ]
         guard let function = jsObject.requestDevice.function
             else { fatalError("Invalid function \(#function)") }
-        let result = function.callAsFunction(this: jsObject, arguments: [optionsArg])
+        let result = function.callAsFunction(this: jsObject, arguments: [["acceptAllDevices": true]]) // FIXME: Options
         guard let promise = result.object.flatMap({ JSPromise($0) })
             else { fatalError("Invalid object \(result)") }
         return try await promise.get().object.flatMap({ JSBluetoothDevice(unsafelyWrapping: $0) })!

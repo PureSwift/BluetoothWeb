@@ -16,7 +16,7 @@ import GATT
  */
 public final class JSBluetoothCharacteristicProperties: JSBridgedClass {
     
-    public static let constructor = JSObject.global.BluetoothCharacteristicProperties.function!
+    public static let constructor = JSObject.global.BluetoothCharacteristicProperties.function
     
     // MARK: - Properties
     
