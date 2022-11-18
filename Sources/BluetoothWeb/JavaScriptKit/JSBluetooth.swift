@@ -92,15 +92,14 @@ public final class JSBluetooth: JSBridgedClass {
         // Bluetooth.requestDevice([options])
         // .then(function(bluetoothDevice) { ... })
         
-        let optionsArg: [ConvertibleToJSValue] = [
-            [
-                "acceptAllDevices": true,
-                //"optionalServices": options.optionalServices ?? []
-            ],
+        let optionsArg: ConvertibleToJSValue = [
+            "acceptAllDevices": true.jsValue,
+            "optionalServices": (options.optionalServices ?? []).jsValue
         ]
+        
         guard let function = jsObject.requestDevice.function
             else { fatalError("Invalid function \(#function)") }
-        let result = function.callAsFunction(this: jsObject, arguments: optionsArg)
+        let result = function.callAsFunction(this: jsObject, arguments: [optionsArg])
         guard let promise = result.object.flatMap({ JSPromise($0) })
             else { fatalError("Invalid object \(result)") }
         return try await promise.get().object.flatMap({ JSBluetoothDevice(unsafelyWrapping: $0) })!
