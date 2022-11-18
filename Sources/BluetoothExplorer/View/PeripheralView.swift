@@ -73,7 +73,7 @@ extension PeripheralView {
                 let uuid = serviceGroup.service.uuid
                 VStack(alignment: .leading, spacing: nil) {
                     AnyView(
-                        Text(verbatim: uuid.name ?? uuid.rawValue)
+                        Text(verbatim: /* uuid.name ?? */ uuid.rawValue)
                     )
                 }
             case let .characteristic(characteristicGroup):
@@ -83,7 +83,7 @@ extension PeripheralView {
                         Button(action: {
                             select(characteristicGroup.characteristic)
                         }, label: {
-                            Text(verbatim: uuid.name ?? uuid.rawValue)
+                            Text(verbatim: /* uuid.name ??*/  uuid.rawValue)
                         })
                         .buttonStyle(BorderlessButtonStyle())
                     )

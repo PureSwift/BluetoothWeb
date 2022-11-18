@@ -69,6 +69,8 @@ extension AttributeValueCell {
 internal extension BluetoothUUID {
     
     func description(for value: Data) -> String? {
+        // FIXME: Formatting
+        /*
         switch self {
         case .batteryLevel:
             return value.first.flatMap { $0.description + "%" }
@@ -84,7 +86,8 @@ internal extension BluetoothUUID {
             return String(data: value, encoding: .utf8)
         default:
             return nil
-        }
+        }*/
+        return nil
     }
 }
 

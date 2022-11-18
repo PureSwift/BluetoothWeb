@@ -7,8 +7,8 @@
 
 import Foundation
 import JavaScriptKit
-import Bluetooth
-import GATT
+@_exported import Bluetooth
+@_exported import GATT
 
 /// [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
 public final class WebCentral: CentralManager {
@@ -22,6 +22,14 @@ public final class WebCentral: CentralManager {
     }()
     
     // MARK: - Properties
+
+    public var log: ((String) -> ())?
+
+    public var peripherals: [Peripheral: Bool] { 
+        get async {
+            return [:] // FIXME: Connected peripherals
+        }
+    } 
     
     internal let bluetooth: JSBluetooth
     
@@ -57,6 +65,10 @@ public final class WebCentral: CentralManager {
             advertisementData: Advertisement(localName: device.name),
             isConnectable: true
         )
+    }
+    
+    public func scan(filterDuplicates: Bool) async throws -> AsyncCentralScan<WebCentral> {
+        fatalError()
     }
     
     /// Connect to the specified device
@@ -265,7 +277,8 @@ public final class WebCentral: CentralManager {
         }
         try await characteristicObject.startNotifications()
         return AsyncCentralNotifications<WebCentral> { [unowned self] continuation in
-            self.continuation.notifications[characteristic] = (closure, continuation)
+            // FIXME: 
+            //self.continuation.notifications[characteristic] = (closure, continuation)
             characteristicObject.addEventListener(
                 "characteristicvaluechanged",
                 closure
@@ -278,7 +291,7 @@ public final class WebCentral: CentralManager {
         return .default
     }
 
-    func rssi(for peripheral: Peripheral) async throws -> RSSI {
+    public func rssi(for peripheral: Peripheral) async throws -> RSSI {
         return RSSI(rawValue: +20)!
     }
     
