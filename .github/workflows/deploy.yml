@@ -1,0 +1,27 @@
+name: Deploy
+on: [workflow_dispatch]
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    container: ghcr.io/swiftwasm/carton:latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Swift Version
+      run: swift --version
+    - name: Build
+      run: carton bundle
+    - name: Archive Build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: wasm-bundle
+        path: ./Bundle
+    - name: Deploy
+      uses: s0/git-publish-subdir-action@develop
+      env:
+        REPO: self
+        BRANCH: gh-pages
+        FOLDER: Bundle
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
