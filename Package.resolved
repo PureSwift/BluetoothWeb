@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/PureSwift/Bluetooth.git",
       "state" : {
-        "revision" : "d493bd427c95913ea1f78091384dfa5321ac8593",
-        "version" : "6.2.2"
+        "revision" : "88943f1edfd9868e6339852ab3a9e6d61e077287",
+        "version" : "6.3.1"
       }
     },
     {
@@ -15,7 +15,7 @@
       "location" : "https://github.com/PureSwift/GATT",
       "state" : {
         "branch" : "master",
-        "revision" : "0fae18058831665fdde3bc671c6ab6c2624fc46c"
+        "revision" : "d6210f85299a6f3844824c014f4d0be67b7c15ff"
       }
     },
     {
@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftwasm/JavaScriptKit.git",
       "state" : {
-        "revision" : "dac9d7b0342c5027fc74c8d2f212f10624123a7b",
-        "version" : "0.17.0"
+        "revision" : "096584bb6959f16d97daf3ebf52039f98c36fdbf",
+        "version" : "0.18.0"
       }
     },
     {
@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-argument-parser",
       "state" : {
-        "revision" : "fddd1c00396eed152c45a46bea9f47b98e59301d",
-        "version" : "1.2.0"
+        "revision" : "fee6933f37fde9a5e12a1e4aeaa93fe60116ff2a",
+        "version" : "1.2.2"
       }
     },
     {
@@ -68,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/TokamakUI/Tokamak",
       "state" : {
-        "revision" : "af810902bdae65f59055d43191f747b45e32e436",
-        "version" : "0.11.0"
+        "revision" : "f1cbfcf073e2675566b0e9aa337441357d40d88a",
+        "version" : "0.11.1"
       }
     }
   ],
