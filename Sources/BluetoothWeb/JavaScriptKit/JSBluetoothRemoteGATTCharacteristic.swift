@@ -16,7 +16,7 @@ import Bluetooth
  */
 public final class JSBluetoothRemoteGATTCharacteristic: JSBridgedClass {
     
-    public static let constructor = JSObject.global.BluetoothRemoteGATTCharacteristic.function
+    public static var constructor: JSFunction? { JSObject.global.BluetoothRemoteGATTCharacteristic.function }
     
     // MARK: - Properties
     
@@ -43,7 +43,7 @@ public final class JSBluetoothRemoteGATTCharacteristic: JSBridgedClass {
     
     // MARK: - Methods
     
-    public func descriptor(for uuid: BluetoothUUID) async throws -> JSBluetoothRemoteGATTDescriptor {
+    public func descriptor(for uuid: BluetoothUUID) async throws(BluetoothWebError) -> JSBluetoothRemoteGATTDescriptor {
         guard let function = jsObject.getDescriptor.function
             else { fatalError("Missing function \(#function)") }
         let result = function.callAsFunction(this: jsObject, uuid)
@@ -56,7 +56,7 @@ public final class JSBluetoothRemoteGATTCharacteristic: JSBridgedClass {
     /*
      The `BluetoothRemoteGATTCharacteristic.readValue()` method returns a `Promise` that resolves to a `DataView` holding a duplicate of the value property if it is available and supported. Otherwise it throws an error.
      */
-    public func readValue() async throws -> JSDataView {
+    public func readValue() async throws(BluetoothWebError) -> JSDataView {
         guard let function = jsObject.readValue.function
             else { fatalError("Missing function \(#function)") }
         let result = function.callAsFunction(this: jsObject)
@@ -69,7 +69,7 @@ public final class JSBluetoothRemoteGATTCharacteristic: JSBridgedClass {
     /*
      Sets the value property to the bytes contained in a given `ArrayBuffer`.
      */
-    public func writeValueWithResponse(_ data: JSDataView) async throws {
+    public func writeValueWithResponse(_ data: JSDataView) async throws(BluetoothWebError) {
         guard let function = jsObject.writeValueWithResponse.function
             else { fatalError("Missing function \(#function)") }
         let result = function.callAsFunction(this: jsObject, data)
@@ -81,7 +81,7 @@ public final class JSBluetoothRemoteGATTCharacteristic: JSBridgedClass {
     /*
      Sets the value property to the bytes contained in a given `ArrayBuffer`.
      */
-    public func writeValueWithoutResponse(_ data: JSDataView) async throws {
+    public func writeValueWithoutResponse(_ data: JSDataView) async throws(BluetoothWebError) {
         guard let function = jsObject.writeValueWithoutResponse.function
             else { fatalError("Missing function \(#function)") }
         let result = function.callAsFunction(this: jsObject, data)
@@ -93,7 +93,7 @@ public final class JSBluetoothRemoteGATTCharacteristic: JSBridgedClass {
     /*
      The `BluetoothRemoteGATTCharacteristic.startNotifications()` method returns a `Promise` to the `BluetoothRemoteGATTCharacteristic` instance when there is an active notification on it.
      */
-    public func startNotifications() async throws {
+    public func startNotifications() async throws(BluetoothWebError) {
         guard let function = jsObject.startNotifications.function
             else { fatalError("Missing function \(#function)") }
         let result = function.callAsFunction(this: jsObject)
@@ -105,7 +105,7 @@ public final class JSBluetoothRemoteGATTCharacteristic: JSBridgedClass {
     /*
      The `BluetoothRemoteGATTCharacteristic.stopNotifications()` method returns a `Promise` to the `BluetoothRemoteGATTCharacteristic` instance when there is no longer an active notification on it.
      */
-    public func stopNotifications() async throws {
+    public func stopNotifications() async throws(BluetoothWebError) {
         guard let function = jsObject.stopNotifications.function
             else { fatalError("Missing function \(#function)") }
         let result = function.callAsFunction(this: jsObject)

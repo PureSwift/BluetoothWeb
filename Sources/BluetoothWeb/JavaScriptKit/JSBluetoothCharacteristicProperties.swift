@@ -16,7 +16,7 @@ import GATT
  */
 public final class JSBluetoothCharacteristicProperties: JSBridgedClass {
     
-    public static let constructor = JSObject.global.BluetoothCharacteristicProperties.function
+    public static var constructor: JSFunction? { JSObject.global.BluetoothCharacteristicProperties.function }
     
     // MARK: - Properties
     
@@ -83,39 +83,30 @@ public final class JSBluetoothCharacteristicProperties: JSBridgedClass {
     }
 }
 
-public extension JSBluetoothCharacteristicProperties {
+extension GATT.CharacteristicProperties {
     
-    var bitmask: BitMaskOptionSet<CharacteristicProperty> {
-        var bitmask = BitMaskOptionSet<CharacteristicProperty>()
-        if authenticatedSignedWrites {
-            bitmask.insert(.signedWrite)
+    init(_ jsValue: JSBluetoothCharacteristicProperties) {
+        self.init()
+        if jsValue.authenticatedSignedWrites {
+            insert(.signedWrite)
         }
-        if broadcast {
-            bitmask.insert(.broadcast)
+        if jsValue.broadcast {
+            insert(.broadcast)
         }
-        if indicate {
-            bitmask.insert(.indicate)
+        if jsValue.indicate {
+            insert(.indicate)
         }
-        if notify {
-            bitmask.insert(.notify)
+        if jsValue.notify {
+            insert(.notify)
         }
-        if read {
-            bitmask.insert(.read)
+        if jsValue.read {
+            insert(.read)
         }
-        if write {
-            bitmask.insert(.write)
+        if jsValue.write {
+            insert(.write)
         }
-        if writeWithoutResponse {
-            bitmask.insert(.writeWithoutResponse)
+        if jsValue.writeWithoutResponse {
+            insert(.writeWithoutResponse)
         }
-        // Extended properties?
-        /*
-        if reliableWrite {
-            bitmask.insert(.reliableWrite)
-        }
-        if writableAuxiliaries {
-            bitmask.insert(.writableAuxiliaries)
-        }*/
-        return bitmask
     }
 }

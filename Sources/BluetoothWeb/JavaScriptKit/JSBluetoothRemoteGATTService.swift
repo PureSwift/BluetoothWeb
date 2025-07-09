@@ -15,7 +15,7 @@ import Bluetooth
  */
 public final class JSBluetoothRemoteGATTService: JSBridgedClass {
     
-    public static let constructor = JSObject.global.BluetoothRemoteGattService.function
+    public static var constructor: JSFunction? { JSObject.global.BluetoothRemoteGattService.function }
     
     // MARK: - Properties
     
@@ -35,7 +35,7 @@ public final class JSBluetoothRemoteGATTService: JSBridgedClass {
     
     // MARK: - Methods
     
-    public func characteristic(for uuid: BluetoothUUID) async throws -> JSBluetoothRemoteGATTCharacteristic {
+    public func characteristic(for uuid: BluetoothUUID) async throws(BluetoothWebError) -> JSBluetoothRemoteGATTCharacteristic {
         guard let function = jsObject.getCharacteristic.function
             else { fatalError("Missing function \(#function)") }
         let result = function.callAsFunction(this: jsObject, uuid)

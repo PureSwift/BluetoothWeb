@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Bluetooth
 import JavaScriptKit
 
 /*
@@ -13,7 +14,7 @@ import JavaScriptKit
  */
 public final class JSDataView: JSBridgedClass {
     
-    public static let constructor = JSObject.global.DataView.function
+    public static var constructor: JSFunction? { JSObject.global.DataView.function }
     
     // MARK: - Properties
     
@@ -72,6 +73,8 @@ public final class JSDataView: JSBridgedClass {
 
 extension JSDataView: Sequence {
     
+    public typealias Element = UInt8
+    
     public func makeIterator() -> IndexingIterator<JSDataView> {
         return IndexingIterator(_elements: self)
     }
@@ -114,13 +117,17 @@ extension JSDataView: RandomAccessCollection {
 
 // MARK: - Data
 
-public extension JSDataView {
+extension JSDataView {
     
-    /// Allocates a DataView from data.
-    convenience init(_ data: Data) {
-        let arrayBuffer = JSArrayBuffer(count: data.count)
+    convenience init() {
+        let arrayBuffer = JSArrayBuffer(count: 0)
         self.init(arrayBuffer)
-        for (index, byte) in data.enumerated() {
+    }
+
+    convenience init<C: Collection>(_ collection: C) where C.Element == UInt8 {
+        let arrayBuffer = JSArrayBuffer(count: collection.count)
+        self.init(arrayBuffer)
+        for (index, byte) in collection.enumerated() {
             self[index] = byte
         }
     }

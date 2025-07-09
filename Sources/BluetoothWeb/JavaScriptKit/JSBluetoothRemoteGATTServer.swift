@@ -12,7 +12,7 @@ import Bluetooth
 // https://developer.mozilla.org/en-US/docs/Web/API/BluetoothRemoteGATTServer
 public final class JSBluetoothRemoteGATTServer: JSBridgedClass {
     
-    public static let constructor = JSObject.global.BluetoothRemoteGATTServer.function
+    public static var constructor: JSFunction? { JSObject.global.BluetoothRemoteGATTServer.function }
     
     // MARK: - Properties
     
@@ -41,7 +41,7 @@ public final class JSBluetoothRemoteGATTServer: JSBridgedClass {
     // MARK: - Methods
     
     /// Causes the script execution environment to connect to this device.
-    public func connect() async throws {
+    public func connect() async throws(BluetoothWebError) {
         guard let function = jsObject.connect.function
             else { fatalError("Missing function \(#function)") }
         let result = function.callAsFunction(this: jsObject)
@@ -60,7 +60,7 @@ public final class JSBluetoothRemoteGATTServer: JSBridgedClass {
     /// Returns a promise to the primary BluetoothGATTService offered by the bluetooth device for a specified BluetoothServiceUUID.
     ///
     /// - Parameter uuid: A Bluetooth service universally unique identifier for a specified device.
-    public func primaryService(for uuid: BluetoothUUID) async throws -> JSBluetoothRemoteGATTService {
+    public func primaryService(for uuid: BluetoothUUID) async throws(BluetoothWebError) -> JSBluetoothRemoteGATTService {
         guard let function = jsObject.getPrimaryService.function
             else { fatalError("Missing function \(#function)") }
         let result = function.callAsFunction(this: jsObject, uuid)

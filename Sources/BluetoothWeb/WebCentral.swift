@@ -13,17 +13,17 @@ import JavaScriptKit
 /// [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
 public final class WebCentral: CentralManager {
     
-    public static let shared: WebCentral? = {
+    public static var shared: WebCentral? {
         guard let jsBluetooth = JSBluetooth.shared else {
             return nil
         }
         let central = WebCentral(jsBluetooth)
         return central
-    }()
+    }
     
     // MARK: - Properties
 
-    public var log: ((String) -> ())?
+    public var log: (@Sendable (String) -> ())? 
 
     public var peripherals: [Peripheral: Bool] { 
         get async {
@@ -125,19 +125,10 @@ public final class WebCentral: CentralManager {
                 // cache
                 self.cache.services[service] = serviceObject
             }
-            catch let error as JSError {
-                if error.jsObject.NotFoundError != nil {
-                    continue
-                }
-                throw error
-            }
-            catch let error as JSValue {
-                if error.NotFoundError != nil {
-                    continue
-                }
-                throw error
-            }
             catch {
+                guard error.name == "NotFoundError" else {
+                    continue
+                }
                 throw error
             }
         }
@@ -172,24 +163,15 @@ public final class WebCentral: CentralManager {
                     id: newAttributeID(for: service.peripheral),
                     uuid: characteristicObject.uuid,
                     peripheral: service.peripheral,
-                    properties: characteristicObject.properties.bitmask
+                    properties: .init(characteristicObject.properties)
                 )
                 characteristics[characteristic] = characteristicObject
                 self.cache.characteristics[characteristic] = characteristicObject
             }
-            catch let error as JSError {
-                if error.jsObject.NotFoundError != nil {
-                    continue
-                }
-                throw error
-            }
-            catch let error as JSValue {
-                if error.NotFoundError != nil {
-                    continue
-                }
-                throw error
-            }
             catch {
+                guard error.name == "NotFoundError" else {
+                    continue
+                }
                 throw error
             }
         }
@@ -277,12 +259,12 @@ public final class WebCentral: CentralManager {
         }
         try await characteristicObject.startNotifications()
         return AsyncCentralNotifications<WebCentral> { [unowned self] continuation in
-            // FIXME: 
+            // FIXME:
             //self.continuation.notifications[characteristic] = (closure, continuation)
-            characteristicObject.addEventListener(
-                "characteristicvaluechanged",
-                closure
-            )
+            //characteristicObject.addEventListener(
+            //    "characteristicvaluechanged",
+            //    closure
+            //)
         }
     }
     
@@ -346,24 +328,6 @@ public final class WebCentral: CentralManager {
     }
 }
 
-#if canImport(Darwin)
-@available(*, deprecated, message: "Should not run on macOS")
-public extension WebCentral {
-    
-    func scan(with services: Set<BluetoothUUID>, filterDuplicates: Bool) -> AsyncThrowingStream<ScanData<Peripheral, Advertisement>, Error> {
-        fatalError("Should not run on macOS")
-    }
-    
-    func stopScan() async {
-        fatalError("Should not run on macOS")
-    }
-    
-    func rssi(for peripheral: Peripheral) async throws -> RSSI {
-        fatalError("Should not run on macOS")
-    }
-}
-#endif
-
 // MARK: - Supporting Types
 
 public extension WebCentral {
@@ -381,7 +345,7 @@ public extension WebCentral {
         public let localName: String?
         
         /// The Manufacturer data of a peripheral.
-        public var manufacturerData: ManufacturerSpecificData? { return nil }
+        public var manufacturerData: GATT.ManufacturerSpecificData<Data>? { return nil }
         
         /// This value is available if the broadcaster (peripheral) provides its Tx power level in its advertising packet.
         /// Using the RSSI value and the Tx power level, it is possible to calculate path loss.
@@ -417,7 +381,7 @@ internal extension WebCentral {
     }
 }
 
-extension BluetoothUUID: ConvertibleToJSValue {
+extension BluetoothUUID: @retroactive ConvertibleToJSValue {
     
     /*
      Bluetooth Web API
@@ -436,7 +400,7 @@ extension BluetoothUUID: ConvertibleToJSValue {
     }
 }
 
-extension BluetoothUUID: ConstructibleFromJSValue {
+extension BluetoothUUID: @retroactive ConstructibleFromJSValue {
     
     public static func construct(from value: JSValue) -> BluetoothUUID? {
         switch value {

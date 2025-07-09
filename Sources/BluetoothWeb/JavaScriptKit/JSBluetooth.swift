@@ -13,7 +13,7 @@ import Bluetooth
 /// - SeeAlso: [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
 public final class JSBluetooth: JSBridgedClass {
     
-    public static let constructor = JSObject.global.Bluetooth.function
+    public static var constructor: JSFunction? { JSObject.global.Bluetooth.function }
     
     // MARK: - Properties
     
@@ -25,10 +25,12 @@ public final class JSBluetooth: JSBridgedClass {
         self.jsObject = jsObject
     }
     
-    public static let shared: JSBluetooth? = JSObject.global
-        .navigator.object?
-        .bluetooth.object
-        .flatMap { JSBluetooth(unsafelyWrapping: $0) }
+    public static var shared: JSBluetooth? {
+        JSObject.global
+            .navigator.object?
+            .bluetooth.object
+            .flatMap { JSBluetooth(unsafelyWrapping: $0) }
+    }
     
     // MARK: - Accessors
     
@@ -140,24 +142,3 @@ public extension JSBluetooth {
     }
 }
 
-// MARK: - Extensions
-
-internal extension JSPromise {
-    
-    /// Wait for the promise to complete, returning (or throwing) its result.
-    func get() async throws -> JSValue {
-        return try await withUnsafeThrowingContinuation { [self] continuation in
-            self.then(
-                success: {
-                    continuation.resume(returning: $0)
-                    return JSValue.undefined
-                },
-                failure: {
-                    let error: Error = $0.object.flatMap { JSError(unsafelyWrapping: $0) } ?? $0
-                    continuation.resume(throwing: error)
-                    return JSValue.undefined
-                }
-            )
-        }
-    }
-}
