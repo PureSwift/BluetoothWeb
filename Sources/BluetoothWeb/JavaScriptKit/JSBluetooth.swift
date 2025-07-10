@@ -74,7 +74,7 @@ public final class JSBluetooth: JSBridgedClass {
     /// If there is no chooser UI, this method returns the first device matching the criteria.
     ///
     /// - Returns: A Promise to a `BluetoothDevice` object.
-    public func requestDevice(services: [BluetoothUUID]) async throws -> JSBluetoothDevice {
+    public func requestDevice(services: [BluetoothUUID]) async throws(BluetoothWebError) -> JSBluetoothDevice {
         let options = RequestDeviceOptions(
             filters: nil,
             optionalServices: services,
@@ -89,7 +89,7 @@ public final class JSBluetooth: JSBridgedClass {
     /// - Returns: A Promise to a `BluetoothDevice` object.
     internal func requestDevice(
         options: RequestDeviceOptions
-    ) async throws -> JSBluetoothDevice {
+    ) async throws(BluetoothWebError) -> JSBluetoothDevice {
         
         // Bluetooth.requestDevice([options])
         // .then(function(bluetoothDevice) { ... })
