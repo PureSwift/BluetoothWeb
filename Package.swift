@@ -27,7 +27,7 @@ let package = Package(
             from: "1.0.0"
         ),
         .package(
-            url: "https://github.com/PureSwift/Tokamak",
+            url: "https://github.com/PureSwift/OpenCombineJS",
             branch: "feature/swift-6"
         ),
     ],
@@ -36,10 +36,21 @@ let package = Package(
             name: "BluetoothExplorer",
             dependencies: [
                 .product(
-                    name: "TokamakShim",
-                    package: "Tokamak"
+                    name: "JavaScriptKit",
+                    package: "JavaScriptKit"
+                ),
+                .product(
+                    name: "JavaScriptEventLoop",
+                    package: "JavaScriptKit"
+                ),
+                .product(
+                    name: "OpenCombineJS",
+                    package: "OpenCombineJS"
                 ),
                 "BluetoothWeb"
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
             ]
         ),
         .target(
