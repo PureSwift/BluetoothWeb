@@ -7,10 +7,9 @@
 //
 
 import Foundation
-import OpenCombineJS
 import BluetoothWeb
 
-final class Store: ObservableObject {
+final class Store {
     
     typealias Central = WebCentral
     
@@ -26,34 +25,24 @@ final class Store: ObservableObject {
     
     // MARK: - Properties
     
-    @Published
     private(set) var activity = [Peripheral: Bool]()
     
-    @Published
     private(set) var scanResults = [Peripheral: ScanData]()
     
-    @Published
     private(set) var connected = Set<Peripheral>()
     
-    @Published
     private(set) var services = [Peripheral: [Service]]()
     
-    @Published
     private(set) var characteristics = [Service: [Characteristic]]()
     
-    @Published
     private(set) var descriptors = [Characteristic: [Descriptor]]()
     
-    @Published
     private(set) var characteristicValues = [Characteristic: Cache<AttributeValue>]()
     
-    @Published
     private(set) var descriptorValues = [Descriptor: Cache<AttributeValue>]()
     
-    @Published
     private(set) var isNotifying = [Characteristic: Bool]()
 
-    @Published
     private(set) var uuids = BluetoothUUID.assignedNumbers
     
     private var central: Central {
