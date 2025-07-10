@@ -25,11 +25,7 @@ let package = Package(
         .package(
             url: "https://github.com/swiftwasm/carton", 
             from: "1.0.0"
-        ),
-        .package(
-            url: "https://github.com/PureSwift/OpenCombineJS",
-            branch: "feature/swift-6"
-        ),
+        )
     ],
     targets: [
         .executableTarget(
@@ -42,10 +38,6 @@ let package = Package(
                 .product(
                     name: "JavaScriptEventLoop",
                     package: "JavaScriptKit"
-                ),
-                .product(
-                    name: "OpenCombineJS",
-                    package: "OpenCombineJS"
                 ),
                 "BluetoothWeb"
             ],

@@ -1,5 +1,5 @@
 {
-  "originHash" : "91b39b02dc4771ae9712c92eb317e6a6c2303e333e4a8b78c1e07a4ec2b05676",
+  "originHash" : "8b9fa03f36e28f9031578e369b01375583549c82b9f928671bfc0bee273248cb",
   "pins" : [
     {
       "identity" : "bluetooth",
@@ -35,24 +35,6 @@
       "state" : {
         "revision" : "e854719ecf1f87fa5015fc8da88cb11832aa1fc8",
         "version" : "0.31.2"
-      }
-    },
-    {
-      "identity" : "opencombine",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/OpenCombine/OpenCombine.git",
-      "state" : {
-        "revision" : "8576f0d579b27020beccbccc3ea6844f3ddfc2c2",
-        "version" : "0.14.0"
-      }
-    },
-    {
-      "identity" : "opencombinejs",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/PureSwift/OpenCombineJS.git",
-      "state" : {
-        "branch" : "feature/swift-6",
-        "revision" : "d418e75cdce9e9b235bfed28369c8d492a45b175"
       }
     },
     {
