@@ -27,18 +27,18 @@ let package = Package(
             from: "1.0.0"
         ),
         .package(
-            url: "https://github.com/TokamakUI/Tokamak",
-            from: "0.11.0"
+            url: "https://github.com/PureSwift/Tokamak",
+            branch: "feature/swift-6"
         ),
     ],
     targets: [
         .executableTarget(
             name: "BluetoothExplorer",
-            dependencies: [/*
+            dependencies: [
                 .product(
                     name: "TokamakShim",
                     package: "Tokamak"
-                ),*/
+                ),
                 "BluetoothWeb"
             ]
         ),

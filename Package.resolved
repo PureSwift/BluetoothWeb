@@ -1,5 +1,5 @@
 {
-  "originHash" : "cf8ccfacce333c98a7ea8deca0d533e03ac1eae8ac5a70bdf4239ade4d164699",
+  "originHash" : "a9935b2cc7fdcfc11b3ea527b87dde1e12b3974a622fa32c39260dd3f4eab4a5",
   "pins" : [
     {
       "identity" : "bluetooth",
@@ -49,10 +49,10 @@
     {
       "identity" : "opencombinejs",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/swiftwasm/OpenCombineJS.git",
+      "location" : "https://github.com/PureSwift/OpenCombineJS.git",
       "state" : {
-        "revision" : "e574e418ba468ff5c2d4c499eb56f108aeb4d2ba",
-        "version" : "0.2.0"
+        "branch" : "feature/swift-6",
+        "revision" : "31d86153f828ac08070cce5d8365cff3c83d3e22"
       }
     },
     {
@@ -121,10 +121,10 @@
     {
       "identity" : "tokamak",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/TokamakUI/Tokamak",
+      "location" : "https://github.com/PureSwift/Tokamak",
       "state" : {
-        "revision" : "f1cbfcf073e2675566b0e9aa337441357d40d88a",
-        "version" : "0.11.1"
+        "branch" : "feature/swift-6",
+        "revision" : "184d9ea2205b4a020eeace012f7c54f974fd0c92"
       }
     },
     {
