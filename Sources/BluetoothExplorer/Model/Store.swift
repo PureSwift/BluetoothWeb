@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import TokamakDOM
+import OpenCombineJS
 import BluetoothWeb
 
 final class Store: ObservableObject {
@@ -64,12 +64,6 @@ final class Store: ObservableObject {
     }
     
     // MARK: - Initialization
-    /*
-    init(central: Central) {
-        self.central = central
-        observeValues()
-    }
-    */
     
     private init() { }
     
@@ -99,28 +93,35 @@ final class Store: ObservableObject {
         central.disconnect(peripheral)
     }
     
-    func discoverServices(for peripheral: Central.Peripheral) async throws {
+    @discardableResult
+    func discoverServices(for peripheral: Central.Peripheral) async throws -> [Service] {
         activity[peripheral] = true
         defer { activity[peripheral] = false }
         let services = try await central.discoverServices(uuids, for: peripheral)
         self.services[peripheral] = services
+        return services
     }
     
-    func discoverCharacteristics(for service: Service) async throws {
+    @discardableResult
+    func discoverCharacteristics(for service: Service) async throws -> [Characteristic] {
         activity[service.peripheral] = true
         defer { activity[service.peripheral] = false }
         let characteristics = try await central.discoverCharacteristics(uuids, for: service)
         self.characteristics[service] = characteristics
+        return characteristics
     }
     
-    func discoverDescriptors(for characteristic: Characteristic) async throws {
+    @discardableResult
+    func discoverDescriptors(for characteristic: Characteristic) async throws -> [Descriptor] {
         activity[characteristic.peripheral] = true
         defer { activity[characteristic.peripheral] = false }
         let includedServices = try await central.discoverDescriptors(for: characteristic)
         self.descriptors[characteristic] = includedServices
+        return includedServices
     }
     
-    func readValue(for characteristic: Characteristic) async throws {
+    @discardableResult
+    func readValue(for characteristic: Characteristic) async throws -> AttributeValue {
         activity[characteristic.peripheral] = true
         defer { activity[characteristic.peripheral] = false }
         let data = try await central.readValue(for: characteristic)
@@ -130,6 +131,7 @@ final class Store: ObservableObject {
             data: data
         )
         self.characteristicValues[characteristic, default: .init(capacity: 5)].append(value)
+        return value
     }
     
     func writeValue(_ data: Data, for characteristic: Characteristic, withResponse: Bool = true) async throws {
@@ -193,5 +195,21 @@ final class Store: ObservableObject {
             data: data
         )
         self.descriptorValues[descriptor, default: .init(capacity: 5)].append(value)
+    }
+}
+
+extension Store {
+    
+    func readAllCharacteristics(for peripheral: Peripheral) async throws {
+        let services = try await discoverServices(for: peripheral)
+        for service in services {
+            let characteristics = try await discoverCharacteristics(for: service)
+            for characteristic in characteristics {
+                guard characteristic.properties.contains(.read) else {
+                    continue
+                }
+                try await readValue(for: characteristic)
+            }
+        }
     }
 }
