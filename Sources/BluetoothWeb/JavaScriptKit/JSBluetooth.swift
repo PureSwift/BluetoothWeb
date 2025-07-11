@@ -13,7 +13,7 @@ import Bluetooth
 /// - SeeAlso: [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
 public final class JSBluetooth: JSBridgedClass {
     
-    public static let constructor = JSObject.global.Bluetooth.function
+    public static var constructor: JSFunction? { JSObject.global.Bluetooth.function }
     
     // MARK: - Properties
     
@@ -25,10 +25,12 @@ public final class JSBluetooth: JSBridgedClass {
         self.jsObject = jsObject
     }
     
-    public static let shared: JSBluetooth? = JSObject.global
-        .navigator.object?
-        .bluetooth.object
-        .flatMap { JSBluetooth(unsafelyWrapping: $0) }
+    public static var shared: JSBluetooth? {
+        JSObject.global
+            .navigator.object?
+            .bluetooth.object
+            .flatMap { JSBluetooth(unsafelyWrapping: $0) }
+    }
     
     // MARK: - Accessors
     
@@ -72,7 +74,7 @@ public final class JSBluetooth: JSBridgedClass {
     /// If there is no chooser UI, this method returns the first device matching the criteria.
     ///
     /// - Returns: A Promise to a `BluetoothDevice` object.
-    public func requestDevice(services: [BluetoothUUID]) async throws -> JSBluetoothDevice {
+    public func requestDevice(services: [BluetoothUUID]) async throws(BluetoothWebError) -> JSBluetoothDevice {
         let options = RequestDeviceOptions(
             filters: nil,
             optionalServices: services,
@@ -87,7 +89,7 @@ public final class JSBluetooth: JSBridgedClass {
     /// - Returns: A Promise to a `BluetoothDevice` object.
     internal func requestDevice(
         options: RequestDeviceOptions
-    ) async throws -> JSBluetoothDevice {
+    ) async throws(BluetoothWebError) -> JSBluetoothDevice {
         
         // Bluetooth.requestDevice([options])
         // .then(function(bluetoothDevice) { ... })
@@ -140,24 +142,3 @@ public extension JSBluetooth {
     }
 }
 
-// MARK: - Extensions
-
-internal extension JSPromise {
-    
-    /// Wait for the promise to complete, returning (or throwing) its result.
-    func get() async throws -> JSValue {
-        return try await withUnsafeThrowingContinuation { [self] continuation in
-            self.then(
-                success: {
-                    continuation.resume(returning: $0)
-                    return JSValue.undefined
-                },
-                failure: {
-                    let error: Error = $0.object.flatMap { JSError(unsafelyWrapping: $0) } ?? $0
-                    continuation.resume(throwing: error)
-                    return JSValue.undefined
-                }
-            )
-        }
-    }
-}

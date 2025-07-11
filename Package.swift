@@ -1,8 +1,8 @@
-// swift-tools-version:5.7
+// swift-tools-version:6.0
 import PackageDescription
 let package = Package(
     name: "BluetoothWeb",
-    platforms: [.macOS(.v12)],
+    platforms: [.macOS(.v15)],
     products: [
         .executable(
             name: "BluetoothExplorer",
@@ -15,12 +15,16 @@ let package = Package(
     ],
     dependencies: [
         .package(
-            url: "https://github.com/TokamakUI/Tokamak",
-            from: "0.11.0"
+          url: "https://github.com/swiftwasm/JavaScriptKit.git",
+          from: "0.31.2"
         ),
         .package(
             url: "https://github.com/PureSwift/GATT",
             branch: "master"
+        ),
+        .package(
+            url: "https://github.com/swiftwasm/carton", 
+            from: "1.0.0"
         )
     ],
     targets: [
@@ -28,23 +32,30 @@ let package = Package(
             name: "BluetoothExplorer",
             dependencies: [
                 .product(
-                    name: "TokamakShim",
-                    package: "Tokamak"
+                    name: "JavaScriptKit",
+                    package: "JavaScriptKit"
+                ),
+                .product(
+                    name: "JavaScriptEventLoop",
+                    package: "JavaScriptKit"
                 ),
                 "BluetoothWeb"
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
             ]
         ),
         .target(
             name: "BluetoothWeb",
             dependencies: [
                 .product(
-                    name: "TokamakShim",
-                    package: "Tokamak"
-                ),
-                .product(
                     name: "GATT",
                     package: "GATT"
                 ),
+                .product(
+                    name: "JavaScriptKit",
+                    package: "JavaScriptKit"
+                )
             ]
         )
     ]
