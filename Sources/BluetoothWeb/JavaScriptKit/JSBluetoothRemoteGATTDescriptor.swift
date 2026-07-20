@@ -16,7 +16,7 @@ import Bluetooth
  */
 public final class JSBluetoothRemoteGATTDescriptor: JSBridgedClass {
     
-    public static var constructor: JSFunction? { JSObject.global.BluetoothRemoteGATTDescriptor.function }
+    public static var constructor: JSObject? { JSObject.global.BluetoothRemoteGATTDescriptor.object }
     
     // MARK: - Properties
     
