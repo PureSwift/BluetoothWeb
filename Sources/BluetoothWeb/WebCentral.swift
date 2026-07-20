@@ -127,9 +127,9 @@ public final class WebCentral: CentralManager {
             }
             catch {
                 guard error.name == "NotFoundError" else {
-                    continue
+                    throw error
                 }
-                throw error
+                continue
             }
         }
         return services.keys.sorted(by: { $0.id < $1.id })
@@ -170,9 +170,9 @@ public final class WebCentral: CentralManager {
             }
             catch {
                 guard error.name == "NotFoundError" else {
-                    continue
+                    throw error
                 }
-                throw error
+                continue
             }
         }
         return characteristics.keys.sorted(by: { $0.id < $1.id })
