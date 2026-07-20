@@ -126,10 +126,12 @@ public final class WebCentral: CentralManager {
                 self.cache.services[service] = serviceObject
             }
             catch {
-                guard error.name == "NotFoundError" else {
+                switch error.name {
+                case "NotFoundError", "SecurityError":
+                    continue
+                default:
                     throw error
                 }
-                continue
             }
         }
         return services.keys.sorted(by: { $0.id < $1.id })
@@ -169,10 +171,12 @@ public final class WebCentral: CentralManager {
                 self.cache.characteristics[characteristic] = characteristicObject
             }
             catch {
-                guard error.name == "NotFoundError" else {
+                switch error.name {
+                case "NotFoundError", "SecurityError":
+                    continue
+                default:
                     throw error
                 }
-                continue
             }
         }
         return characteristics.keys.sorted(by: { $0.id < $1.id })
