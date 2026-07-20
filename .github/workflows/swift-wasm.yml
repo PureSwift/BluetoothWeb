@@ -11,6 +11,9 @@ jobs:
     - name: Swift Version
       run: swift --version
     - name: Install Swift SDK for WebAssembly
+      id: swift-sdk
       uses: swiftwasm/setup-swiftwasm@v2
+      with:
+        target: wasm32-unknown-wasip1
     - name: Build
-      run: swift build --swift-sdk wasm32-unknown-wasi
+      run: swift build --swift-sdk ${{ steps.swift-sdk.outputs.swift-sdk-id }}
