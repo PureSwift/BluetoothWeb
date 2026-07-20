@@ -12,7 +12,7 @@ import Bluetooth
 /// JavaScript Bluetooth Device object.
 public final class JSBluetoothDevice: JSBridgedClass {
     
-    public static var constructor: JSFunction? { JSObject.global.BluetoothDevice.function }
+    public static var constructor: JSObject? { JSObject.global.BluetoothDevice.object }
     
     // MARK: - Properties
     

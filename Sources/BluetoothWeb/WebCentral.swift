@@ -13,13 +13,13 @@ import JavaScriptKit
 /// [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
 public final class WebCentral: CentralManager {
     
-    public static var shared: WebCentral? {
+    public static nonisolated(unsafe) let shared: WebCentral? = {
         guard let jsBluetooth = JSBluetooth.shared else {
             return nil
         }
         let central = WebCentral(jsBluetooth)
         return central
-    }
+    }()
     
     // MARK: - Properties
 
@@ -126,10 +126,12 @@ public final class WebCentral: CentralManager {
                 self.cache.services[service] = serviceObject
             }
             catch {
-                guard error.name == "NotFoundError" else {
+                switch error.name {
+                case "NotFoundError", "SecurityError":
                     continue
+                default:
+                    throw error
                 }
-                throw error
             }
         }
         return services.keys.sorted(by: { $0.id < $1.id })
@@ -169,10 +171,12 @@ public final class WebCentral: CentralManager {
                 self.cache.characteristics[characteristic] = characteristicObject
             }
             catch {
-                guard error.name == "NotFoundError" else {
+                switch error.name {
+                case "NotFoundError", "SecurityError":
                     continue
+                default:
+                    throw error
                 }
-                throw error
             }
         }
         return characteristics.keys.sorted(by: { $0.id < $1.id })
@@ -403,12 +407,11 @@ extension BluetoothUUID: @retroactive ConvertibleToJSValue {
 extension BluetoothUUID: @retroactive ConstructibleFromJSValue {
     
     public static func construct(from value: JSValue) -> BluetoothUUID? {
-        switch value {
-        case let .string(string):
-            return BluetoothUUID(web: string.description)
-        case let .number(number):
+        if let string = value.string {
+            return BluetoothUUID(web: string)
+        } else if let number = value.number {
             return .bit16(UInt16(number))
-        default:
+        } else {
             return nil
         }
     }

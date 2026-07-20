@@ -17,7 +17,7 @@ import JavaScriptKit
  */
 public final class JSArrayBuffer: JSBridgedClass {
     
-    public static var constructor: JSFunction? { JSObject.global.ArrayBuffer.function }
+    public static var constructor: JSObject? { JSObject.global.ArrayBuffer.object }
     
     // MARK: - Properties
     

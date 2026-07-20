@@ -4,16 +4,16 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    container: swift:6.1.2-jammy
+    container: swift:6.3.2-noble
     steps:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Swift Version
       run: swift --version
-    - name: Build
-      run: swift run carton bundle
-    - name: Archive Build artifacts
-      uses: actions/upload-artifact@v4
+    - name: Install Swift SDK for WebAssembly
+      id: swift-sdk
+      uses: swiftwasm/setup-swiftwasm@v2
       with:
-        name: wasm-bundle
-        path: ./Bundle
+        target: wasm32-unknown-wasip1
+    - name: Build
+      run: swift build --swift-sdk ${{ steps.swift-sdk.outputs.swift-sdk-id }}
