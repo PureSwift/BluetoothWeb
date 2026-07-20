@@ -13,7 +13,7 @@ import Bluetooth
 /// - SeeAlso: [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
 public final class JSBluetooth: JSBridgedClass {
     
-    public static var constructor: JSFunction? { JSObject.global.Bluetooth.function }
+    public static var constructor: JSObject? { JSObject.global.Bluetooth.object }
     
     // MARK: - Properties
     
