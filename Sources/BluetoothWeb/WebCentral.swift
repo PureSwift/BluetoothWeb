@@ -403,12 +403,11 @@ extension BluetoothUUID: @retroactive ConvertibleToJSValue {
 extension BluetoothUUID: @retroactive ConstructibleFromJSValue {
     
     public static func construct(from value: JSValue) -> BluetoothUUID? {
-        switch value {
-        case let .string(string):
-            return BluetoothUUID(web: string.description)
-        case let .number(number):
+        if let string = value.string {
+            return BluetoothUUID(web: string)
+        } else if let number = value.number {
             return .bit16(UInt16(number))
-        default:
+        } else {
             return nil
         }
     }
