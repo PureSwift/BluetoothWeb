@@ -14,7 +14,7 @@ import JavaScriptKit
  */
 public final class JSDataView: JSBridgedClass {
     
-    public static var constructor: JSFunction? { JSObject.global.DataView.function }
+    public static var constructor: JSObject? { JSObject.global.DataView.object }
     
     // MARK: - Properties
     
