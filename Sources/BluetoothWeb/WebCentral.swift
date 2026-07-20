@@ -13,13 +13,13 @@ import JavaScriptKit
 /// [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
 public final class WebCentral: CentralManager {
     
-    public static var shared: WebCentral? {
+    public static nonisolated(unsafe) let shared: WebCentral? = {
         guard let jsBluetooth = JSBluetooth.shared else {
             return nil
         }
         let central = WebCentral(jsBluetooth)
         return central
-    }
+    }()
     
     // MARK: - Properties
 
