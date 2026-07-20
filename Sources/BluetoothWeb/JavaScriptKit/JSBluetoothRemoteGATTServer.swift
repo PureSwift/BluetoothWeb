@@ -12,7 +12,7 @@ import Bluetooth
 // https://developer.mozilla.org/en-US/docs/Web/API/BluetoothRemoteGATTServer
 public final class JSBluetoothRemoteGATTServer: JSBridgedClass {
     
-    public static var constructor: JSFunction? { JSObject.global.BluetoothRemoteGATTServer.function }
+    public static var constructor: JSObject? { JSObject.global.BluetoothRemoteGATTServer.object }
     
     // MARK: - Properties
     
