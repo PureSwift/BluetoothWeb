@@ -88,3 +88,7 @@ iOSInjectionProject/
 
 # Swift WASM
 Bundle/
+
+# Web
+node_modules/
+dist/
